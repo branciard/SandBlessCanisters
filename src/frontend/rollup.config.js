@@ -123,7 +123,7 @@ export default {
     resolve({
       preferBuiltins: false,
       browser: true,
-      dedupe: ["svelte"],
+      dedupe: ["svelte","svelte/transition","svelte/internal"],
     }),
     commonjs(),
     inject({
