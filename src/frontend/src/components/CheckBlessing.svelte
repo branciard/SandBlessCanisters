@@ -72,20 +72,13 @@
     }
     await loadDip721NameAndSymbol();
   }
-
-  /*function inputCheck() {
-    // no negative values allowed
-    if (inputValue < 0) {
-      inputValue = 0;
-    }
-  }*/
 </script>
 
 <div class="box-info">
   <div class="align-left">4</div>
 
   <div>
-    Blessed mark number :
+    Check blessed mark number existence :
     <input
       class="inputBlessNumber"
       type="number"
