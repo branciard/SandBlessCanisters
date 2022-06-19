@@ -11,5 +11,5 @@
 </script>
 
 <p>
-  <button on:click={showQRCode}>Show</button>
+  <button on:click={showQRCode}>Show QR Code</button>
 </p>

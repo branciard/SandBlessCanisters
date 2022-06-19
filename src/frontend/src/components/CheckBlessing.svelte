@@ -7,6 +7,7 @@
   import { quintOut } from 'svelte/easing';
   import { fade, draw, fly } from 'svelte/transition';
   import { expand } from '../store/custom-transitions.js';
+  import { Principal } from '@dfinity/principal';
 
   let checkOK = false;
 
@@ -19,6 +20,8 @@
   let dip721Name = '';
 
   let dip721Symbol = '';
+
+  let ownerOfDip721 = '';
 
   let inputValue;
 
@@ -60,6 +63,10 @@
     if (tokenid) {
       let metadata = await $auth.actor.getMetadataDip721(BigInt(tokenid));
       if (metadata && Array.isArray(metadata.Ok) && metadata.Ok.length === 1) {
+        const resultOwner = await $auth.actor.ownerOfDip721(tokenid);
+        if (resultOwner && resultOwner.Ok && resultOwner.Ok._arr.length > 0) {
+          ownerOfDip721 = new Principal(resultOwner.Ok._arr).toString();
+        }
         checkOK = true;
         checkKo = false;
       } else {
@@ -78,7 +85,7 @@
   <div class="align-left">4</div>
 
   <div>
-    Check blessed mark number existence :
+    Check blessed mark number existence and ownership:
     <input
       class="inputBlessNumber"
       type="number"
@@ -151,29 +158,20 @@
   {#if checkOK && dip721Name && inputValue}
     <div>
       <div>
-        Blessed marks collection name : {dip721Name}
+        <span class="classBold"> Blessed marks collection name : </span>
+        {dip721Name}
       </div>
       <div>
-        Blessed marks collection symbol : {dip721Symbol}
-      </div>
-      <div>Blessed Mark Number : {inputValue}</div>
-      <div>Blessed Mark universal Link :</div>
-      <div>
-        <a
-          href={'https://' +
-            process.env.BACKEND_CANISTER_ID +
-            '.ic0.app?tokenid=' +
-            inputValue}
-          target="_blank"
-          class="cursor-pointer"
-          >{'https://' +
-            process.env.BACKEND_CANISTER_ID +
-            '.ic0.app?tokenid=' +
-            inputValue}</a
-        >
+        <span class="classBold"> Blessed marks collection symbol :</span>
+        {dip721Symbol}
       </div>
       <div>
-        Blessed Mark universal QR Code
+        <span class="classBold"> Blessed Mark Number :</span>
+        {inputValue}
+      </div>
+      <div><span class="classBold"> Owned by :</span> {ownerOfDip721}</div>
+      <div>
+        <span class="classBold"> Blessed Mark universal QR Code </span>
         <Modal>
           <ContentQRCode tokenid={inputValue} />
         </Modal>
@@ -199,6 +197,9 @@
   }
   .inputBlessNumber {
     width: 15%;
+  }
+  .classBold {
+    font-weight: bold;
   }
   svg {
     padding-top: 20px;

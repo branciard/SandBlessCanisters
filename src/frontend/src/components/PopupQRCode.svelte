@@ -31,11 +31,14 @@
         tokenid}
       target="_blank"
       class="cursor-pointer"
-      >{'https://' +
-        process.env.BACKEND_CANISTER_ID +
-        '.ic0.app?tokenid=' +
-        tokenid}</a
+      >{'https://' + process.env.BACKEND_CANISTER_ID + '.ic0.app'}</a
     >
+  </div>
+  <div>
+    <p>
+      Blessed mark Number :
+      {tokenid}
+    </p>
   </div>
   <p>Blessed Mark universal QR Code</p>
   <div>

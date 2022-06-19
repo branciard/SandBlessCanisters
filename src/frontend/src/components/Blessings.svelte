@@ -1,23 +1,32 @@
 <script>
   import { AuthClient } from '@dfinity/auth-client';
-  import { onMount, getContext } from 'svelte';
+  import { onMount } from 'svelte';
   import { auth, createActor } from '../store/auth';
   import ContentQRCode from './ContentQRCode.svelte';
   import Modal from 'svelte-simple-modal';
+  import { Principal } from '@dfinity/principal';
+  import { fly, fade } from 'svelte/transition';
 
   let client;
 
   let whoami = $auth.actor.whoami();
 
+  let hasError = false;
+  let errMessage = 'Error';
+  let isSuccessVisible = false;
+  let submitted = false;
+
+  let priestMarksToLoad;
+
   let blessings = [];
 
   let mintSuccess = false;
+  let loadSuccess = false;
 
   onMount(async () => {
     client = await AuthClient.create();
     if (await client.isAuthenticated()) {
       handleAuth();
-      await loadBlessingsCollection();
       mintSuccess = false;
     }
   });
@@ -55,8 +64,18 @@
     whoami = $auth.actor.whoami();
   }
 
+  function handleSubmit(e) {
+    isSuccessVisible = true;
+
+    setTimeout(function () {
+      isSuccessVisible = false;
+    }, 4000);
+  }
+
   async function newBless() {
     if ($auth.loggedIn) {
+      loadSuccess = false;
+      mintSuccess = false;
       // locationType 4 means embedded https://rustrepo.com/repo/Psychedelic-DIP721
       let metadata = [
         {
@@ -73,15 +92,36 @@
       let result = await $auth.actor.mintDip721(principal, metadata);
       console.log('Result MintDip721 call :');
       console.log(result);
-      await loadBlessingsCollection();
       mintSuccess = true;
     }
   }
 
-  async function loadBlessingsCollection() {
-    if ($auth.loggedIn) {
-      let principal = await $auth.actor.whoami();
+  async function loadBlessingsCollection(priest) {
+    submitted = true;
+    let principal;
+    let parsing = false;
+    loadSuccess = false;
+    mintSuccess = false;
+    try {
+      principal = Principal.fromText(priest);
+      parsing = true;
+    } catch (e) {
+      parsing = false;
+    }
+    if (parsing) {
+      blessings = [];
       blessings = await $auth.actor.getTokenIdsForUserDip721(principal);
+      if (blessings.length < 1) {
+        hasError = true;
+        errMessage = 'No blessed Mark found.';
+      } else {
+        loadSuccess = true;
+        hasError = false;
+        errMessage = '';
+      }
+    } else {
+      hasError = true;
+      errMessage = 'Wrong Priest Identity format.';
     }
   }
 </script>
@@ -119,13 +159,21 @@
       <div>Login to pray and receive blessings.</div>
     {:else}
       <div>
-        <button on:click={newBless}>Pray and receive blessed mark</button>
+        <form
+          id="loadForm"
+          class="mt-4"
+          class:submitted
+          on:submit|preventDefault={handleSubmit}
+        >
+          <button on:click={newBless}>Pray and receive blessed mark</button>
+          {#if mintSuccess && isSuccessVisible}
+            <span class="success-alert" transition:fade={{ duration: 150 }}>
+              New blessed mark received !
+            </span>
+          {/if}
+        </form>
       </div>
-      {#if mintSuccess}
-        <div>New blessed mark received !</div>
-      {:else}
-        <div>&nbsp;</div>
-      {/if}
+      <div>&nbsp;</div>
     {/if}
   {/await}
 </div>
@@ -134,37 +182,45 @@
     Querying caller identity...
   {:then principal}
     <div class="align-left">3</div>
-    {#if principal.isAnonymous()}
-      <div>Login to see your blessed marks collection.</div>
-    {:else}
-      <div>
-        <button on:click={loadBlessingsCollection}>Load blessed marks</button>
+    <form
+      id="loadForm"
+      class="mt-4"
+      class:submitted
+      on:submit|preventDefault={handleSubmit}
+    >
+      <div class="form-group">
+        <input
+          type="text"
+          class="form-control"
+          bind:value={priestMarksToLoad}
+          placeholder="Priest Identity"
+          required
+        />
       </div>
+      <div>
+        <button on:click={() => loadBlessingsCollection(priestMarksToLoad)}
+          >Load Priest blessed marks</button
+        >
+        {#if hasError == true}
+          <span class="error-alert">{errMessage}</span>
+        {:else if loadSuccess && isSuccessVisible}
+          <span class="success-alert" transition:fade={{ duration: 150 }}>
+            {blessings.length} Blessed Marks found !
+          </span>
+        {/if}
+      </div>
+    </form>
+
+    {#if blessings.length > 0}
       <div>
         <table class="blessingsTab">
           <tr>
             <td>Blessed Mark Number</td>
-            <td>Blessed Mark universal Link</td>
-            <td>Blessed Mark universal QR Code</td>
+            <td>Blessed Universal Mark</td>
           </tr>
           {#each blessings as bless, index}
             <tr>
               <td>{bless}</td>
-              <td>
-                <a
-                  href={'https://' +
-                    process.env.BACKEND_CANISTER_ID +
-                    '.ic0.app?tokenid=' +
-                    bless}
-                  target="_blank"
-                  class="cursor-pointer"
-                  >{'https://' +
-                    process.env.BACKEND_CANISTER_ID +
-                    '.ic0.app?tokenid=' +
-                    bless}</a
-                >
-                <div />
-              </td>
               <td>
                 <Modal>
                   <ContentQRCode tokenid={bless} />
@@ -202,5 +258,35 @@
     padding: 6px 10px;
     border-style: ridge;
     border-color: var(--color-blue-sea);
+  }
+  .form-group > * {
+    width: 520px;
+  }
+
+  .form-control {
+    border-radius: 3px;
+  }
+
+  .submitted input:invalid {
+    border: 1px solid #c00;
+  }
+
+  .submitted input:focus:invalid {
+    outline: 1px solid #c00;
+  }
+
+  .error-alert {
+    border: 1px solid #c00 !important;
+    padding: 6px;
+    text-align: center;
+    color: #c00;
+    border-radius: 3px;
+  }
+  .success-alert {
+    border: 1px solid #4bb543 !important;
+    padding: 6px;
+    text-align: center;
+    color: #4bb543;
+    border-radius: 3px;
   }
 </style>
