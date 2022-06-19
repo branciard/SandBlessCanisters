@@ -12,7 +12,9 @@
     2 - Gift of prayer : receive a unique blessed mark to tag your artwork
   </div>
   <div>3 - Unction ritual : sand blast QR code mark on your artwork</div>
-  <div>4 - Onchain faith: check artwork QR code mark existence</div>
+  <div>
+    4 - Onchain faith: check artwork QR code mark existence and ownership
+  </div>
 </div>
 
 <style>

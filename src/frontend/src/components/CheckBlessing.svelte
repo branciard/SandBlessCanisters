@@ -25,19 +25,10 @@
 
   let inputValue;
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const tokenidUrlParamToCheck = urlParams.has('tokenid');
-  const tokenidUrlParamValue = urlParams.get('tokenid');
-
   onMount(async () => {
     client = await AuthClient.create();
     if (await client.isAuthenticated()) {
       handleAuth();
-      await loadDip721NameAndSymbol();
-      if (tokenidUrlParamToCheck) {
-        inputValue = tokenidUrlParamValue;
-        await checkBless(tokenidUrlParamValue);
-      }
     }
   });
 
@@ -60,12 +51,14 @@
   }
 
   async function checkBless(tokenid) {
+    console.log('checkBless:' + tokenid);
     if (tokenid) {
       let metadata = await $auth.actor.getMetadataDip721(BigInt(tokenid));
       if (metadata && Array.isArray(metadata.Ok) && metadata.Ok.length === 1) {
-        const resultOwner = await $auth.actor.ownerOfDip721(tokenid);
+        const resultOwner = await $auth.actor.ownerOfDip721(BigInt(tokenid));
         if (resultOwner && resultOwner.Ok && resultOwner.Ok._arr.length > 0) {
           ownerOfDip721 = new Principal(resultOwner.Ok._arr).toString();
+          console.log('update ownerOfDip721 to ' + ownerOfDip721);
         }
         checkOK = true;
         checkKo = false;
@@ -93,7 +86,7 @@
       placeholder="Mark number"
       required
     />
-    <button on:click={() => checkBless(inputValue)}>Check</button>
+    <button on:click={checkBless(inputValue)}>Check</button>
   </div>
   <div class="wrapper">
     {#if checkOK}

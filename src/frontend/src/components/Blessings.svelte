@@ -13,7 +13,9 @@
 
   let hasError = false;
   let errMessage = 'Error';
-  let isSuccessVisible = false;
+  let isSuccessVisibleNewBless = false;
+  let isSuccessVisibleLoad = false;
+
   let submitted = false;
 
   let priestMarksToLoad;
@@ -64,17 +66,24 @@
     whoami = $auth.actor.whoami();
   }
 
-  function handleSubmit(e) {
-    isSuccessVisible = true;
+  function handleSubmitNewBless(e) {
+    isSuccessVisibleNewBless = true;
 
     setTimeout(function () {
-      isSuccessVisible = false;
+      isSuccessVisibleNewBless = false;
+    }, 8000);
+  }
+
+  function handleSubmitLoad(e) {
+    isSuccessVisibleLoad = true;
+
+    setTimeout(function () {
+      isSuccessVisibleLoad = false;
     }, 4000);
   }
 
   async function newBless() {
     if ($auth.loggedIn) {
-      loadSuccess = false;
       mintSuccess = false;
       // locationType 4 means embedded https://rustrepo.com/repo/Psychedelic-DIP721
       let metadata = [
@@ -101,7 +110,6 @@
     let principal;
     let parsing = false;
     loadSuccess = false;
-    mintSuccess = false;
     try {
       principal = Principal.fromText(priest);
       parsing = true;
@@ -163,10 +171,10 @@
           id="loadForm"
           class="mt-4"
           class:submitted
-          on:submit|preventDefault={handleSubmit}
+          on:submit|preventDefault={handleSubmitNewBless}
         >
           <button on:click={newBless}>Pray and receive blessed mark</button>
-          {#if mintSuccess && isSuccessVisible}
+          {#if mintSuccess && isSuccessVisibleNewBless}
             <span class="success-alert" transition:fade={{ duration: 150 }}>
               New blessed mark received !
             </span>
@@ -186,7 +194,7 @@
       id="loadForm"
       class="mt-4"
       class:submitted
-      on:submit|preventDefault={handleSubmit}
+      on:submit|preventDefault={handleSubmitLoad}
     >
       <div class="form-group">
         <input
@@ -198,12 +206,12 @@
         />
       </div>
       <div>
-        <button on:click={() => loadBlessingsCollection(priestMarksToLoad)}
+        <button on:click={loadBlessingsCollection(priestMarksToLoad)}
           >Load Priest blessed marks</button
         >
         {#if hasError == true}
           <span class="error-alert">{errMessage}</span>
-        {:else if loadSuccess && isSuccessVisible}
+        {:else if loadSuccess && isSuccessVisibleLoad}
           <span class="success-alert" transition:fade={{ duration: 150 }}>
             {blessings.length} Blessed Marks found !
           </span>

@@ -34,7 +34,7 @@ shared actor class SandBlessDip721NFT(init : Types.Dip721NonFungibleToken) = Sel
   };
 
   public query func ownerOfDip721(token_id: Types.TokenId) : async Types.OwnerResult {
-    let item = List.get(nfts, Nat64.toNat(token_id));
+    let item = List.find(nfts, func(token: Types.Nft) : Bool { token.id == token_id });
     switch (item) {
       case (null) {
         return #Err(#InvalidTokenId);
@@ -58,7 +58,7 @@ shared actor class SandBlessDip721NFT(init : Types.Dip721NonFungibleToken) = Sel
   };
 
   func transferFrom(from: Principal, to: Principal, token_id: Types.TokenId, caller: Principal) : Types.TxReceipt {
-    let item = List.get(nfts, Nat64.toNat(token_id));
+   let item = List.find(nfts, func(token: Types.Nft) : Bool { token.id == token_id });
     switch (item) {
       case null {
         return #Err(#InvalidTokenId);
@@ -113,7 +113,7 @@ shared actor class SandBlessDip721NFT(init : Types.Dip721NonFungibleToken) = Sel
   };
 
   public query func getMetadataDip721(token_id: Types.TokenId) : async Types.MetadataResult {
-    let item = List.get(nfts, Nat64.toNat(token_id));
+    let item = List.find(nfts, func(token: Types.Nft) : Bool { token.id == token_id });
     switch (item) {
       case null {
         return #Err(#InvalidTokenId);
