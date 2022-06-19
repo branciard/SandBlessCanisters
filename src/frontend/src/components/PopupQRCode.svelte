@@ -26,12 +26,12 @@
   <div>
     <a
       href={'https://' +
-        process.env.BACKEND_CANISTER_ID +
+        process.env.FRONTEND_CANISTER_ID +
         '.ic0.app?tokenid=' +
         tokenid}
       target="_blank"
       class="cursor-pointer"
-      >{'https://' + process.env.BACKEND_CANISTER_ID + '.ic0.app'}</a
+      >{'https://' + process.env.FRONTEND_CANISTER_ID + '.ic0.app'}</a
     >
   </div>
   <div>
