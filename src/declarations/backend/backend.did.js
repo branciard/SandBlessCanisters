@@ -96,5 +96,5 @@ export const init = ({ IDL }) => {
     'name' : IDL.Text,
     'symbol' : IDL.Text,
   });
-  return [IDL.Principal, Dip721NonFungibleToken];
+  return [Dip721NonFungibleToken];
 };

@@ -104,4 +104,4 @@ type ApiError =
    Unauthorized;
    ZeroAddress;
  };
-service : (principal, Dip721NonFungibleToken) -> SandBlessDip721NFT
+service : (Dip721NonFungibleToken) -> SandBlessDip721NFT

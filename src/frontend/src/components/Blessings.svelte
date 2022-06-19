@@ -1,6 +1,6 @@
 <script>
   import { AuthClient } from '@dfinity/auth-client';
-  import { onMount } from 'svelte';
+  import { onMount, getContext } from 'svelte';
   import { auth, createActor } from '../store/auth';
   import ContentQRCode from './ContentQRCode.svelte';
   import Modal from 'svelte-simple-modal';
@@ -11,11 +11,14 @@
 
   let blessings = [];
 
+  let mintSuccess = false;
+
   onMount(async () => {
     client = await AuthClient.create();
     if (await client.isAuthenticated()) {
       handleAuth();
       await loadBlessingsCollection();
+      mintSuccess = false;
     }
   });
 
@@ -71,7 +74,7 @@
       console.log('Result MintDip721 call :');
       console.log(result);
       await loadBlessingsCollection();
-    } else {
+      mintSuccess = true;
     }
   }
 
@@ -98,11 +101,11 @@
   {/await}
   {#if $auth.loggedIn}
     <div>
-      <button on:click={logout}>Log out from Sand Bless Ceremony. </button>
+      <button on:click={logout}>Log out from Sand Bless Ceremony</button>
     </div>
   {:else}
     <div>
-      <button on:click={login}>Login to start Sand Bless Ceremony.</button>
+      <button on:click={login}>Login and enter Sand Bless Ceremony</button>
     </div>
   {/if}
 </div>
@@ -116,11 +119,13 @@
       <div>Login to pray and receive blessings.</div>
     {:else}
       <div>
-        <button on:click={newBless}
-          >Pray and receive a unique blessed mark for your artwork.</button
-        >
+        <button on:click={newBless}>Pray and receive blessed mark</button>
       </div>
-      <div>&nbsp;</div>
+      {#if mintSuccess}
+        <div>New blessed mark received !</div>
+      {:else}
+        <div>&nbsp;</div>
+      {/if}
     {/if}
   {/await}
 </div>
@@ -133,7 +138,7 @@
       <div>Login to see your blessed marks collection.</div>
     {:else}
       <div>
-        <button on:click={loadBlessingsCollection}>Load blessed marks.</button>
+        <button on:click={loadBlessingsCollection}>Load blessed marks</button>
       </div>
       <div>
         <table class="blessingsTab">
@@ -149,13 +154,13 @@
                 <a
                   href={'https://' +
                     process.env.BACKEND_CANISTER_ID +
-                    '.app?tokenid=' +
+                    '.ic0.app?tokenid=' +
                     bless}
                   target="_blank"
                   class="cursor-pointer"
                   >{'https://' +
                     process.env.BACKEND_CANISTER_ID +
-                    '.app?tokenid=' +
+                    '.ic0.app?tokenid=' +
                     bless}</a
                 >
                 <div />

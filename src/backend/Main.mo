@@ -12,12 +12,11 @@ import Principal "mo:base/Principal";
 import Types "./Types";
 
 // SandBlessDip721NFT from https://github.com/dfinity/examples/tree/master/motoko/dip-721-nft-container
-shared actor class SandBlessDip721NFT(custodian: Principal, init : Types.Dip721NonFungibleToken) = Self {
+shared actor class SandBlessDip721NFT(init : Types.Dip721NonFungibleToken) = Self {
 
 
   stable var transactionId: Types.TransactionId = 0;
   stable var nfts = List.nil<Types.Nft>();
-  stable var custodians = List.make<Principal>(custodian);
   stable var logo : Types.LogoResult = init.logo;
   stable var name : Text = init.name;
   stable var symbol : Text = init.symbol;
@@ -66,8 +65,7 @@ shared actor class SandBlessDip721NFT(custodian: Principal, init : Types.Dip721N
       };
       case (?token) {
         if (
-          caller != token.owner and
-          not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })
+          caller != token.owner
         ) {
           return #Err(#Unauthorized);
         } else if (Principal.notEqual(from, token.owner)) {
@@ -152,10 +150,6 @@ shared actor class SandBlessDip721NFT(custodian: Principal, init : Types.Dip721N
   };
 
   public shared({ caller }) func mintDip721(to: Principal, metadata: Types.MetadataDesc) : async Types.MintReceipt {
-   /* if (not List.some(custodians, func (custodian : Principal) : Bool { custodian == caller })) {
-      return #Err(#Unauthorized);
-    };
-  */
 
     let newId = Nat64.fromNat(List.size(nfts));
     let nft : Types.Nft = {

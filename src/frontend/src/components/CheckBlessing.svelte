@@ -2,6 +2,8 @@
   import { AuthClient } from '@dfinity/auth-client';
   import { onMount } from 'svelte';
   import { auth, createActor } from '../store/auth';
+  import ContentQRCode from './ContentQRCode.svelte';
+  import Modal from 'svelte-simple-modal';
   import { quintOut } from 'svelte/easing';
   import { fade, draw, fly } from 'svelte/transition';
   import { expand } from '../store/custom-transitions.js';
@@ -71,36 +73,28 @@
     await loadDip721NameAndSymbol();
   }
 
-  function inputCheck() {
+  /*function inputCheck() {
     // no negative values allowed
     if (inputValue < 0) {
       inputValue = 0;
     }
-  }
+  }*/
 </script>
 
 <div class="box-info">
   <div class="align-left">4</div>
+
   <div>
-    <div>
-      Blessed marks collection name : "{dip721Name}"
-    </div>
-    <div>
-      Blessed marks collection symbol : "{dip721Symbol}"
-    </div>
-  </div>
-  <div>
-    Blessed mark number to verify :
+    Blessed mark number :
     <input
+      class="inputBlessNumber"
       type="number"
       bind:value={inputValue}
-      placeholder="Blessed mark number"
+      placeholder="Mark number"
       required
-      on:change={(inputValue = inputCheck(inputValue))}
     />
     <button on:click={() => checkBless(inputValue)}>Check</button>
   </div>
-
   <div class="wrapper">
     {#if checkOK}
       <svg
@@ -161,6 +155,38 @@
       </svg>
     {/if}
   </div>
+  {#if checkOK && dip721Name && inputValue}
+    <div>
+      <div>
+        Blessed marks collection name : {dip721Name}
+      </div>
+      <div>
+        Blessed marks collection symbol : {dip721Symbol}
+      </div>
+      <div>Blessed Mark Number : {inputValue}</div>
+      <div>Blessed Mark universal Link :</div>
+      <div>
+        <a
+          href={'https://' +
+            process.env.BACKEND_CANISTER_ID +
+            '.ic0.app?tokenid=' +
+            inputValue}
+          target="_blank"
+          class="cursor-pointer"
+          >{'https://' +
+            process.env.BACKEND_CANISTER_ID +
+            '.ic0.app?tokenid=' +
+            inputValue}</a
+        >
+      </div>
+      <div>
+        Blessed Mark universal QR Code
+        <Modal>
+          <ContentQRCode tokenid={inputValue} />
+        </Modal>
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -177,6 +203,9 @@
   }
   .align-left {
     text-align: left;
+  }
+  .inputBlessNumber {
+    width: 15%;
   }
   svg {
     padding-top: 20px;

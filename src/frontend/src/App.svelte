@@ -16,7 +16,7 @@
     />
   </a>
 
-  <h2>Your crypto-owned-mark to bless your artwork.</h2>
+  <h2>Bless your artwork using owned crypto-marks.</h2>
 
   <Howto />
   <Blessings />

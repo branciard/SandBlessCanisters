@@ -24,7 +24,18 @@
 <div class="popupcontent">
   <p>Blessed Mark universal Link</p>
   <div>
-    https://{process.env.BACKEND_CANISTER_ID}.app?tokenid={tokenid}
+    <a
+      href={'https://' +
+        process.env.BACKEND_CANISTER_ID +
+        '.ic0.app?tokenid=' +
+        tokenid}
+      target="_blank"
+      class="cursor-pointer"
+      >{'https://' +
+        process.env.BACKEND_CANISTER_ID +
+        '.ic0.app?tokenid=' +
+        tokenid}</a
+    >
   </div>
   <p>Blessed Mark universal QR Code</p>
   <div>
