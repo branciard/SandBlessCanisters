@@ -5,7 +5,7 @@
 # Sand Bless Unction
 
 
-## Sand Bless UnctionBless your artwork using owned crypto-marks
+## Sand Bless Unction : Bless your artwork using owned crypto-marks
 
 
 ## Inspiration
