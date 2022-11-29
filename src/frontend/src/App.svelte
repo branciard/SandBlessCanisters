@@ -3,10 +3,44 @@
   import Howto from './components/Howto.svelte';
   import Blessings from './components/Blessings.svelte';
   import CheckBlessing from './components/CheckBlessing.svelte';
+
+  import ImageIPFS from './components/ImageIPFS.svelte';
+  import { ipfs } from './store/ipfs';
+
+  import {
+    Tab,
+    TabGroup,
+    TabList,
+    TabPanel,
+    TabPanels,
+  } from '@rgossiaux/svelte-headlessui';
+
+  const ipfsInstance = ipfs.get();
 </script>
 
 <main>
   <h1>Sand Bless Unction</h1>
+
+  {#await ipfsInstance}
+    Querying for ipfs ...
+  {:then ipfs}
+    <ImageIPFS {ipfs} cid="Qmcm32sVsMYhURY3gqH7vSQ76492t5Rfxb3vsWCb35gVme" />
+  {/await}
+
+  <TabGroup manual>
+    <TabList>
+      <Tab>Atelier Graveur</Tab>
+      <Tab>Sand Blessed Crypto marks</Tab>
+    </TabList>
+    <TabPanels>
+      <TabPanel>Content 1</TabPanel>
+      <TabPanel>
+        <Howto />
+        <Blessings />
+        <CheckBlessing />
+      </TabPanel>
+    </TabPanels>
+  </TabGroup>
 
   <a href="https://dfinity.org" target="_blank" rel="noopener noreferrer">
     <img
@@ -15,9 +49,9 @@
       alt="100% on-chain"
     />
   </a>
-
-  <h2>Bless your artwork using owned crypto-marks.</h2>
-
+  <h2>
+    WORK PROGRESS !!!!! DO NOT USE Bless your artwork using owned crypto-marks.
+  </h2>
   <Howto />
   <Blessings />
   <CheckBlessing />

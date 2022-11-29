@@ -2,6 +2,7 @@ import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 
 export type ApiError = { 'ZeroAddress' : null } |
+  { 'InvalidArtworkId' : null } |
   { 'InvalidTokenId' : null } |
   { 'Unauthorized' : null } |
   { 'Other' : null };
@@ -24,7 +25,7 @@ export interface LogoResult { 'data' : string, 'logo_type' : string }
 export type MetadataDesc = Array<MetadataPart>;
 export interface MetadataKeyVal { 'key' : string, 'val' : MetadataVal }
 export interface MetadataPart {
-  'data' : Array<number>,
+  'data' : Uint8Array,
   'key_val_data' : Array<MetadataKeyVal>,
   'purpose' : MetadataPurpose,
 }
@@ -37,7 +38,7 @@ export type MetadataVal = { 'Nat64Content' : bigint } |
   { 'Nat8Content' : number } |
   { 'NatContent' : bigint } |
   { 'Nat16Content' : number } |
-  { 'BlobContent' : Array<number> } |
+  { 'BlobContent' : Uint8Array } |
   { 'TextContent' : string };
 export type MintReceipt = { 'Ok' : MintReceiptPart } |
   { 'Err' : ApiError };
@@ -49,21 +50,21 @@ export interface SandBlessDip721NFT {
   'getMaxLimitDip721' : ActorMethod<[], number>,
   'getMetadataDip721' : ActorMethod<[TokenId], MetadataResult>,
   'getMetadataForUserDip721' : ActorMethod<[Principal], ExtendedMetadataResult>,
-  'getTokenIdsForUserDip721' : ActorMethod<[Principal], Array<TokenId>>,
+  'getTokenIdsForUserDip721' : ActorMethod<[Principal], BigUint64Array>,
   'logoDip721' : ActorMethod<[], LogoResult>,
   'mintDip721' : ActorMethod<[Principal, MetadataDesc], MintReceipt>,
   'nameDip721' : ActorMethod<[], string>,
   'ownerOfDip721' : ActorMethod<[TokenId], OwnerResult>,
   'safeTransferFromDip721' : ActorMethod<
     [Principal, Principal, TokenId],
-    TxReceipt,
+    TxReceipt
   >,
   'supportedInterfacesDip721' : ActorMethod<[], Array<InterfaceId>>,
   'symbolDip721' : ActorMethod<[], string>,
   'totalSupplyDip721' : ActorMethod<[], bigint>,
   'transferFromDip721' : ActorMethod<
     [Principal, Principal, TokenId],
-    TxReceipt,
+    TxReceipt
   >,
   'whoami' : ActorMethod<[], Principal>,
 }

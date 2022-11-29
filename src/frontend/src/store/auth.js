@@ -13,7 +13,7 @@ export function createActor(options) {
     host:
       process.env.DFX_NETWORK === "ic"
         ? `https://${process.env.BACKEND_CANISTER_ID}.ic0.app`
-        : "http://localhost:8000",
+        : "http://localhost:4943",
   };
   if (!options) {
     options = {

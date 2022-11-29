@@ -9,7 +9,7 @@
 
   let client;
 
-  let whoami = $auth.actor.whoami();
+  let whoamiFct = $auth.actor.whoami();
 
   let hasError = false;
   let errMessage = 'Error';
@@ -42,8 +42,7 @@
         },
       }),
     }));
-
-    whoami = $auth.actor.whoami();
+    whoamiFct = $auth.actor.whoami();
   }
 
   function login() {
@@ -51,7 +50,7 @@
       identityProvider:
         process.env.DFX_NETWORK === 'ic'
           ? 'https://identity.ic0.app/#authorize'
-          : `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:8000/#authorize`,
+          : `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:4943/#authorize`,
       onSuccess: handleAuth,
     });
   }
@@ -62,8 +61,7 @@
       loggedIn: false,
       actor: createActor(),
     }));
-
-    whoami = $auth.actor.whoami();
+    whoamiFct = $auth.actor.whoami();
   }
 
   function handleSubmitNewBless(e) {
@@ -97,8 +95,8 @@
           purpose: { Rendered: null },
         },
       ];
-      let principal = await $auth.actor.whoami();
-      let result = await $auth.actor.mintDip721(principal, metadata);
+      let principalLocal = await $auth.actor.whoami();
+      let result = await $auth.actor.mintDip721(principalLocal, metadata);
       console.log('Result MintDip721 call :');
       console.log(result);
       mintSuccess = true;
@@ -107,18 +105,18 @@
 
   async function loadBlessingsCollection(priest) {
     submitted = true;
-    let principal;
+    let principalLocal;
     let parsing = false;
     loadSuccess = false;
     try {
-      principal = Principal.fromText(priest);
+      principalLocal = Principal.fromText(priest);
       parsing = true;
     } catch (e) {
       parsing = false;
     }
     if (parsing) {
       blessings = [];
-      blessings = await $auth.actor.getTokenIdsForUserDip721(principal);
+      blessings = await $auth.actor.getTokenIdsForUserDip721(principalLocal);
       if (blessings.length < 1) {
         hasError = true;
         errMessage = 'No blessed Mark found.';
@@ -135,14 +133,14 @@
 </script>
 
 <div class="box-info">
-  {#await whoami}
+  {#await whoamiFct}
     Querying caller identity...
-  {:then principal}
+  {:then principalResult}
     <div class="align-left">1</div>
     <div>Sand Bless Ceremony Priest Identity :</div>
     <div>
-      <code>{principal}</code>
-      {#if principal.isAnonymous()}
+      <code>{principalResult}</code>
+      {#if principalResult.isAnonymous()}
         (anonymous)
       {/if}
     </div>
@@ -159,11 +157,11 @@
 </div>
 
 <div class="box-info">
-  {#await whoami}
+  {#await whoamiFct}
     Querying caller identity...
-  {:then principal}
+  {:then principalResult}
     <div class="align-left">2</div>
-    {#if principal.isAnonymous()}
+    {#if principalResult.isAnonymous()}
       <div>Login to pray and receive blessings.</div>
     {:else}
       <div>
@@ -186,9 +184,9 @@
   {/await}
 </div>
 <div class="box-info">
-  {#await whoami}
+  {#await whoamiFct}
     Querying caller identity...
-  {:then principal}
+  {:then principalResult}
     <div class="align-left">3</div>
     <form
       id="loadForm"
@@ -207,7 +205,7 @@
       </div>
       <div>
         <button on:click={loadBlessingsCollection(priestMarksToLoad)}
-          >Load Priest blessed marks</button
+          >Load Priest blessed crypto marks</button
         >
         {#if hasError == true}
           <span class="error-alert">{errMessage}</span>
@@ -224,7 +222,7 @@
         <table class="blessingsTab">
           <tr>
             <td>Blessed Mark Number</td>
-            <td>Blessed Universal Mark</td>
+            <td>Sand Blessed Crypto Mark</td>
           </tr>
           {#each blessings as bless, index}
             <tr>

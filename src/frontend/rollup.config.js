@@ -5,13 +5,23 @@ import livereload from "rollup-plugin-livereload";
 import { terser } from "rollup-plugin-terser";
 import css from "rollup-plugin-css-only";
 import replace from "@rollup/plugin-replace";
-import inject from "rollup-plugin-inject";
+import inject from "@rollup/plugin-inject";
 import json from "@rollup/plugin-json";
 import sveltePreprocess from "svelte-preprocess";
 
 const production = !process.env.ROLLUP_WATCH;
 
 const path = require("path");
+
+const addSyntheticNamedExportsToSkippedNodeImports = () => ({
+  load: (importee) => {
+    if (importee === '\u0000node-resolve:empty.js') {
+      return {code: 'export default {};', syntheticNamedExports: true};
+    } else {
+      return null;
+    }
+  }
+});
 
 function initCanisterIds() {
   let localCanisters, localIiCanister, prodCanisters, canisters;
@@ -114,6 +124,10 @@ export default {
     // we'll extract any component CSS out into
     // a separate file - better for performance
     css({ output: "bundle.css" }),
+
+
+    // fix error https://github.com/rollup/plugins/issues/440
+    addSyntheticNamedExportsToSkippedNodeImports(),
 
     // If you have external dependencies installed from
     // npm, you'll most likely need these plugins. In

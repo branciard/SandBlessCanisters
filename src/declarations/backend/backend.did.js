@@ -29,6 +29,7 @@ export const idlFactory = ({ IDL }) => {
   const MetadataDesc = IDL.Vec(MetadataPart);
   const ApiError = IDL.Variant({
     'ZeroAddress' : IDL.Null,
+    'InvalidArtworkId' : IDL.Null,
     'InvalidTokenId' : IDL.Null,
     'Unauthorized' : IDL.Null,
     'Other' : IDL.Null,
