@@ -1,14 +1,19 @@
 <script>
+  import ImageIPFS from './ImageIPFS.svelte';
   import { onMount } from 'svelte';
-  export let src;
+  export let ipfs = null;
+  export let cid;
+  export let gateway;
 
   let loaded = false;
   let failed = false;
   let loading = false;
+  let srcComposed;
 
   onMount(() => {
     const img = new Image();
-    img.src = src;
+    srcComposed = `${gateway}${cid}`;
+    img.src = `${gateway}${cid}`;
     loading = true;
 
     img.onload = () => {
@@ -23,13 +28,9 @@
 </script>
 
 {#if loaded}
-  <img class="hover:grow hover:shadow-lg" {src} alt="Document" />
+  <img class="hover:grow hover:shadow-lg" src={srcComposed} alt="Document" />
 {:else if failed}
-  <img
-    class="hover:grow hover:shadow-lg"
-    src="https://icon-library.com/images/not-found-icon/not-found-icon-20.jpg"
-    alt="Not Found"
-  />
+  <ImageIPFS {ipfs} {cid} />
 {:else if loading}
   <img
     class="hover:grow hover:shadow-lg"

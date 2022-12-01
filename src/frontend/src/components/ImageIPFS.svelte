@@ -1,30 +1,28 @@
 <script>
-  export let cid = null;
   export let ipfs = null;
+  export let cid = null;
+  export let mimeType = 'image/gif';
   import Image from './Image.svelte';
-  import * as IPFS from 'ipfs-core';
 
-  let promise = loadImgURL(cid, 'image/png', 524288);
+  let promise = loadImgURL(ipfs, cid, mimeType);
 
-  async function loadImgURL(cid, mime, limit) {
+  async function loadImgURL(ipfs, cid, mimeType) {
     const data = [];
-    if (ipfs == null) {
-      console.log('No IPFS in props so start a new IPFS insance');
-      ipfs = await IPFS.create({ repo: 'ok' + Math.random() });
+    console.log(cid);
+    console.log(ipfs);
+    if (ipfs !== null && cid !== null) {
+      let stream = ipfs.cat(cid);
+      for await (const chunk of stream) {
+        data.push(chunk);
+      }
     }
-
-    // if (!ipfs && !cid) {
-    let stream = ipfs.cat(cid);
-    for await (const chunk of stream) {
-      data.push(chunk);
-    }
-    // }
-    return URL.createObjectURL(new Blob(data, { type: mime }));
+    return URL.createObjectURL(new Blob(data, { type: mimeType }));
   }
 </script>
 
 {#await promise}
   <img
+    class="hover:grow hover:shadow-lg"
     src="https://c.tenor.com/On7kvXhzml4AAAAi/loading-gif.gif"
     alt="Fetching IPFS data......"
   />
