@@ -23,7 +23,7 @@
 {#await promise}
   <img
     class="hover:grow hover:shadow-lg"
-    src="https://c.tenor.com/On7kvXhzml4AAAAi/loading-gif.gif"
+    src="images/SandBlessLoading.gif"
     alt="Fetching IPFS data......"
   />
 {:then src}

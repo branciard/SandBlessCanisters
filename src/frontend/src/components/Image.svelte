@@ -33,7 +33,7 @@
 {:else if loading}
   <img
     class="hover:grow hover:shadow-lg"
-    src="https://c.tenor.com/On7kvXhzml4AAAAi/loading-gif.gif"
+    src="images/SandBlessLoading.gif"
     alt="Loading..."
   />
 {/if}

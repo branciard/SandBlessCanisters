@@ -2,6 +2,10 @@
   "name": "svelte-motoko-starter",
   "version": "0.1.0",
   "description": "Internet Computer starter application",
+  "engines": {
+    "npm": "8.19.3",
+    "node": "v19.2.0"
+  },
   "keywords": [
     "Internet Computer",
     "Motoko",

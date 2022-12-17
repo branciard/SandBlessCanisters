@@ -1,6 +1,11 @@
 .work-sans {
   font-family: 'Work Sans', sans-serif;
 }
+
+.myriad-pro-sans {
+  font-family: 'myriad-pro',sans-serif;
+}
+
       
 #menu-toggle:checked + #menu {
   display: block;
