@@ -12,7 +12,4 @@
     font-size: 14px;
     margin: 0 0 8px;
   }
-  div {
-    margin-top: 40px;
-  }
 </style>

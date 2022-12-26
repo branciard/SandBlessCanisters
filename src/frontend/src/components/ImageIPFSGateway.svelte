@@ -1,7 +1,5 @@
 <script>
-  import ImageIPFS from './ImageIPFS.svelte';
   import { onMount } from 'svelte';
-  export let ipfs = null;
   export let cid;
   export let gateway;
 
@@ -30,7 +28,12 @@
 {#if loaded}
   <img class="hover:grow hover:shadow-lg" src={srcComposed} alt="Document" />
 {:else if failed}
-  <ImageIPFS {ipfs} {cid} />
+  <img
+    class="hover:grow hover:shadow-lg"
+    src="images/SandBlessLoading.gif"
+    alt="Fetching IPFS data......"
+  />
+  <p>Error loading IPFS Image: {error}</p>
 {:else if loading}
   <img
     class="hover:grow hover:shadow-lg"
