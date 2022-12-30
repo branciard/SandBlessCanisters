@@ -92,8 +92,8 @@
       console.log('createMark result:');
       console.log(result);
       try {
-        const sandblessId = BigInt(result.id);
-        await getMark(sandblessId);
+        const markId = BigInt(result.id);
+        await getMark(markId);
       } catch (e) {
         console.log(e);
         console.log('fail to get mark created');
@@ -132,10 +132,10 @@
     }
   }
 
-  async function getMark(sandblessId) {
-    console.log('getMark:' + sandblessId);
-    if (sandblessId) {
-      const result = await $auth.actor.getMark(BigInt(sandblessId));
+  async function getMark(markId) {
+    console.log('getMark:' + markId);
+    if (markId) {
+      const result = await $auth.actor.getMark(BigInt(markId));
       console.log('get mark result :');
       if (result.Ok) {
         console.log('OK :');
@@ -147,6 +147,7 @@
           .locale('fr')
           .format('LLLL');
         currentMarkCreatedBy = result.Ok.createdBy;
+        await getImprintsByMarkId(markId);
       } else {
         console.log('not OK');
         console.log(result);
@@ -154,26 +155,34 @@
     }
   }
 
-  async function getImprintIdsByMarkId(markId) {
-    console.log('getImprintByMarkId:' + markId);
+  async function getImprintsByMarkId(markId) {
+    console.log('getImprintsByMarkId:' + markId);
     if (markId) {
       const result = await $auth.actor.getImprintIdsByMarkId(BigInt(markId));
-      console.log('get getImprintByMarkId result :');
+      console.log('getImprintsByMarkId result :');
       console.log(result);
+      if (util.types.isBigUint64Array(result)) {
+        console.log('is array man');
+      }
+      if (Array.isArray(result)) {
+        for (const id of result) {
+          console.log(id);
+        }
+      }
     }
   }
 
-  async function isMarkExist(sandblessId) {
-    console.log('isMarkExist:' + sandblessId);
-    if (sandblessId) {
-      let result = await $auth.actor.isMarkExist(BigInt(sandblessId));
+  async function isMarkExist(markId) {
+    console.log('isMarkExist:' + markId);
+    if (markId) {
+      let result = await $auth.actor.isMarkExist(BigInt(markId));
 
       console.log(result);
       if (JSON.stringify(result) == 'true') {
         console.log('checkOK true');
         checkOk = true;
         checkKo = false;
-        await getMark(sandblessId);
+        await getMark(markId);
       } else {
         checkOk = false;
         checkKo = true;
@@ -437,77 +446,7 @@
     </div>
 
     <br />
-    {#if $auth.loggedIn}
-      {#await whoami}
-        Querying caller identity...
-      {:then principalResult}
-        <div>Logged Principal :</div>
-        <div>
-          <code>{principalResult}</code>
-          {#if principalResult.isAnonymous()}
-            (anonymous)
-          {/if}
-        </div>
-      {/await}
-      <div>
-        <button
-          class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
-          on:click={logout}>Log out</button
-        >
-        <br />
-        <br />
-        <button
-          class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
-          on:click={createMark}>Creation nouveau marquage</button
-        >
-        <br />
 
-        <button
-          class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
-          on:click={createMark}
-          >Ajouter une empreinte temporelle et un message sur le marquage :</button
-        >
-
-        <br />
-
-        <input
-          class="inputBlessNumber"
-          type="number"
-          bind:value={inputAddImprintValue}
-          placeholder="Sand Bless Id"
-          required
-        />
-
-        <textarea
-          class="
-        form-control
-        block
-        w-full
-        px-3
-        py-1.5
-        text-base
-        font-normal
-        text-gray-700
-        bg-white bg-clip-padding
-        border border-solid border-gray-300
-        rounded
-        transition
-        ease-in-out
-        m-0
-        focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-          bind:value={inputAddImprintTexteAreaValue}
-        />
-
-        <button
-          class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
-          on:click={addImprint(
-            inputAddImprintValue,
-            inputAddImprintTexteAreaValue
-          )}
-          >Ajouter Empreinte associée au marquage {inputAddImprintValue}
-        </button>
-      </div>
-    {/if}
     <CanisterIds />
     <br />
     <br />

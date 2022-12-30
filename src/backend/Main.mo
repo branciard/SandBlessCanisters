@@ -1,38 +1,15 @@
-import Nat "mo:base/Nat";
 import Hash "mo:base/Hash";
-import Nat8 "mo:base/Nat8";
-import Nat16 "mo:base/Nat16";
-import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
-import List "mo:base/List";
 import Text "mo:base/Text";
-import Map "mo:base/HashMap";
-import Iter "mo:base/Iter";
 import TrieSet "mo:base/TrieSet";
-
-import Array "mo:base/Array";
 import Option "mo:base/Option";
-import Bool "mo:base/Bool";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
 import StableBuffer "mo:stable-buffer/StableBuffer";
 import RBTree "mo:stable-rbtree/StableRBTree";
 import Types "./Types";
 
-// SandBlessDip721NFT from https://github.com/dfinity/examples/tree/master/motoko/dip-721-nft-container
-shared actor class SandBlessDip721NFT(init : Types.Dip721NonFungibleToken) = Self {
-
-  stable var transactionId : Types.TransactionId = 0;
-  stable var nfts = List.nil<Types.Nft>();
-  stable var artworks = List.nil<Types.Artwork>();
-  stable var logo : Types.LogoResult = init.logo;
-  stable var name : Text = init.name;
-  stable var symbol : Text = init.symbol;
-  stable var maxLimit : Nat16 = init.maxLimit;
-
-  func nat64Hash(n : Nat64) : Hash.Hash {
-    Text.hash(Nat64.toText(n));
-  };
+shared actor class SandBless() = Self {
 
   private stable var marksCounter : Nat64 = 0;
   private stable var marks = RBTree.init<Nat64, Types.Mark>();
@@ -41,8 +18,16 @@ shared actor class SandBlessDip721NFT(init : Types.Dip721NonFungibleToken) = Sel
   private stable var imprintIdsByMarkId = RBTree.init<Nat64, [Nat64]>();
   private stable var markIdsByImprintId = RBTree.init<Nat64, [Nat64]>();
 
+  func nat64Hash(n : Nat64) : Hash.Hash {
+    Text.hash(Nat64.toText(n));
+  };
+
   // https://forum.dfinity.org/t/is-there-any-address-0-equivalent-at-dfinity-motoko/5445/3
   let null_address : Principal = Principal.fromText("aaaaa-aa");
+
+  public shared query (msg) func whoami() : async Principal {
+    return msg.caller;
+  };
 
   public query func getMarksTotalCount() : async Nat64 {
     return marksCounter;
@@ -137,61 +122,6 @@ shared actor class SandBlessDip721NFT(init : Types.Dip721NonFungibleToken) = Sel
 
     return mark;
   };
-
-  //public shared ({ caller }) func newImprint(markId : Nat64, data : Types.ImprintType, tags : [Text]) : async Types.ImprintResult {
-  //public shared ({ caller }) func attachImprintToMark(markId : Nat64, data : Types.ImprintType, tags : [Text]) : async Types.ImprintResult {
-
-  /*
-  public shared ({ caller }) func newImprint(markIds : [Nat64], data : Types.ImprintType, tags : [Text]) : async Types.ImprintResult {
-    let item = List.find(marks, func(mark : Types.Mark) : Bool { mark.id == markId });
-    switch (item) {
-      case null {
-        return #Err(#InvalidSandBlessId);
-      };
-      case (?mark) {
-        imprintsCounter += 1;
-        let imprint : Types.Imprint = {
-          id = imprintsCounter;
-          createdWhen = Time.now();
-          createdBy = caller;
-          tags = tags;
-          data = data;
-        };
-
-        let idsImprint : ?[Nat64] = RBTree.get(imprintIdsByMarkId, Nat64.compare, markId);
-        switch idsImprint {
-          case (null) {
-            imprintIdsByMarkId := RBTree.put(imprintIdsByMarkId, Nat64.compare, markId, [imprintsCounter]);
-          };
-          case (?idsImprint) {
-            var buffer = StableBuffer.fromArray<Nat64>(idsImprint);
-            StableBuffer.add(buffer, imprintsCounter);
-            imprintIdsByMarkId := RBTree.put(imprintIdsByMarkId, Nat64.compare, markId, StableBuffer.toArray(buffer));
-          };
-        };
-        imprints := RBTree.put(imprints, Nat64.compare, imprintsCounter, imprint);
-        return #Ok(imprint);
-      };
-    };
-
-  };
-*/
-
-  /*
-    let size1 = array1.size();
-    let size2 = array2.size();
-    if (size1 != size2) {
-      return false
-    };
-    var i = 0;
-    while (i < size1) {
-      if (not equal(array1[i], array2[i])) {
-        return false
-      };
-      i += 1
-    };
-    return true
-*/
 
   public shared ({ caller }) func createImprint(markIds : [Nat64], data : Types.ImprintType, tags : [Text]) : async Types.ImprintResult {
 
@@ -288,187 +218,4 @@ shared actor class SandBlessDip721NFT(init : Types.Dip721NonFungibleToken) = Sel
 
   };
 
-  public query func balanceOfDip721(user : Principal) : async Nat64 {
-    return Nat64.fromNat(
-      List.size(
-        List.filter(nfts, func(token : Types.Nft) : Bool { token.owner == user }),
-      ),
-    );
-  };
-
-  public query func ownerOfDip721(token_id : Types.TokenId) : async Types.OwnerResult {
-    let item = List.find(nfts, func(token : Types.Nft) : Bool { token.id == token_id });
-    switch (item) {
-      case (null) {
-        return #Err(#InvalidTokenId);
-      };
-      case (?token) {
-        return #Ok(token.owner);
-      };
-    };
-  };
-
-  public shared ({ caller }) func safeTransferFromDip721(from : Principal, to : Principal, token_id : Types.TokenId) : async Types.TxReceipt {
-    if (to == null_address) {
-      return #Err(#ZeroAddress);
-    } else {
-      return transferFrom(from, to, token_id, caller);
-    };
-  };
-
-  public shared ({ caller }) func transferFromDip721(from : Principal, to : Principal, token_id : Types.TokenId) : async Types.TxReceipt {
-    return transferFrom(from, to, token_id, caller);
-  };
-
-  func transferFrom(from : Principal, to : Principal, token_id : Types.TokenId, caller : Principal) : Types.TxReceipt {
-    let item = List.find(nfts, func(token : Types.Nft) : Bool { token.id == token_id });
-    switch (item) {
-      case null {
-        return #Err(#InvalidTokenId);
-      };
-      case (?token) {
-        if (
-          caller != token.owner,
-        ) {
-          return #Err(#Unauthorized);
-        } else if (Principal.notEqual(from, token.owner)) {
-          return #Err(#Other);
-        } else {
-          nfts := List.map(
-            nfts,
-            func(item : Types.Nft) : Types.Nft {
-              if (item.id == token.id) {
-                let update : Types.Nft = {
-                  owner = to;
-                  id = item.id;
-                  metadata = token.metadata;
-                };
-                return update;
-              } else {
-                return item;
-              };
-            },
-          );
-          transactionId += 1;
-          return #Ok(transactionId);
-        };
-      };
-    };
-  };
-
-  public query func supportedInterfacesDip721() : async [Types.InterfaceId] {
-    return [#TransferNotification, #Burn, #Mint];
-  };
-
-  public query func logoDip721() : async Types.LogoResult {
-    return logo;
-  };
-
-  public query func nameDip721() : async Text {
-    return name;
-  };
-
-  public query func symbolDip721() : async Text {
-    return symbol;
-  };
-
-  public query func totalSupplyDip721() : async Nat64 {
-    return Nat64.fromNat(
-      List.size(nfts),
-    );
-  };
-
-  public query func getMetadataDip721(token_id : Types.TokenId) : async Types.MetadataResult {
-    let item = List.find(nfts, func(token : Types.Nft) : Bool { token.id == token_id });
-    switch (item) {
-      case null {
-        return #Err(#InvalidTokenId);
-      };
-      case (?token) {
-        return #Ok(token.metadata);
-      };
-    };
-  };
-
-  public query func getMaxLimitDip721() : async Nat16 {
-    return maxLimit;
-  };
-
-  public func getMetadataForUserDip721(user : Principal) : async Types.ExtendedMetadataResult {
-    let item = List.find(nfts, func(token : Types.Nft) : Bool { token.owner == user });
-    switch (item) {
-      case null {
-        return #Err(#Other);
-      };
-      case (?token) {
-        return #Ok({
-          metadata_desc = token.metadata;
-          token_id = token.id;
-        });
-      };
-    };
-  };
-
-  public query func getTokenIdsForUserDip721(user : Principal) : async [Types.TokenId] {
-    let items = List.filter(nfts, func(token : Types.Nft) : Bool { token.owner == user });
-    let tokenIds = List.map(items, func(item : Types.Nft) : Types.TokenId { item.id });
-    return List.toArray(tokenIds);
-  };
-  /*
-  public shared ({ caller }) func blessArtwork(caller : Principal, idCreator : Types.SandBlessId, idCollection : Types.SandBlessId, idArtwork : Types.SandBlessId, metadata : Types.MetadataDesc) : async Types.BlessReceipt {
-
-    let artwork : Types.Artwork = {
-      certifyBy = caller;
-      createdAt = now;
-      idCreator = idCreator;
-      idCollection = idCollection;
-      idArtwork = idArtwork;
-      metadata = metadata;
-    };
-
-    artworks := List.push(artwork, artworks);
-
-    transactionId += 1;
-
-    return #Ok({
-      transactionId = transactionId;
-    });
-  };
-
-
-  public query func getBlessedArtwork(idCreator : Types.SandBlessId, idCollection : Types.SandBlessId, idArtwork : Types.SandBlessId) : async Types.MetadataResult {
-    let item = List.find(artworks, func(artwork : Types.Artwork) : Bool { artwork.idCreator == idCreator });
-    switch (item) {
-      case null {
-        return #Err(#InvalidArtworkId);
-      };
-      case (?artwork) {
-        return #Ok(artwork.metadata);
-      };
-    };
-  };
-  */
-
-  public shared ({ caller }) func mintDip721(to : Principal, metadata : Types.MetadataDesc) : async Types.MintReceipt {
-
-    let newId = Nat64.fromNat(List.size(nfts));
-    let nft : Types.Nft = {
-      owner = to;
-      id = newId;
-      metadata = metadata;
-    };
-
-    nfts := List.push(nft, nfts);
-
-    transactionId += 1;
-
-    return #Ok({
-      token_id = newId;
-      id = transactionId;
-    });
-  };
-
-  public shared query (msg) func whoami() : async Principal {
-    return msg.caller;
-  };
 };
