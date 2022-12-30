@@ -9,9 +9,7 @@ module.exports = {
     purgeLayersByDefault: true, 
     removeDeprecatedGapUtilities: true,
   },
-  plugins: [
-
-  ],
+  plugins: [],
   purge: {
     content: [
       "./src/**/*.svelte",

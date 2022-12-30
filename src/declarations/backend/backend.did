@@ -7,10 +7,24 @@ type TokenId = nat64;
 type SandBlessDip721NFT = 
  service {
    balanceOfDip721: (principal) -> (nat64) query;
+   createImprint: (vec nat64, ImprintType, vec text) -> (ImprintResult);
+   createMark: () -> (Mark);
+   getImprint: (nat64) -> (ImprintResult) query;
+   getImprintIdsByMarkId: (nat64) -> (opt vec nat64) query;
+   getImprintIdsByMarkIdTreeSize: () -> (nat) query;
+   getImprintsTotalCount: () -> (nat64) query;
+   getImprintsTreeSize: () -> (nat) query;
+   getMark: (nat64) -> (MarkResult) query;
+   getMarkIdsByImprintId: (nat64) -> (opt vec nat64) query;
+   getMarkIdsByImprintIdTreeSize: () -> (nat) query;
+   getMarksTotalCount: () -> (nat64) query;
+   getMarksTreeSize: () -> (nat) query;
    getMaxLimitDip721: () -> (nat16) query;
    getMetadataDip721: (TokenId) -> (MetadataResult) query;
    getMetadataForUserDip721: (principal) -> (ExtendedMetadataResult);
    getTokenIdsForUserDip721: (principal) -> (vec TokenId) query;
+   isImprintExist: (nat64) -> (bool) query;
+   isMarkExist: (nat64) -> (bool) query;
    logoDip721: () -> (LogoResult) query;
    mintDip721: (principal, MetadataDesc) -> (MintReceipt);
    nameDip721: () -> (text) query;
@@ -69,6 +83,17 @@ type MetadataKeyVal =
    val: MetadataVal;
  };
 type MetadataDesc = vec MetadataPart;
+type MarkResult = 
+ variant {
+   Err: ApiError;
+   Ok: Mark;
+ };
+type Mark = 
+ record {
+   createdBy: principal;
+   createdWhen: int;
+   id: nat64;
+ };
 type LogoResult = 
  record {
    data: text;
@@ -81,6 +106,29 @@ type InterfaceId =
    Mint;
    TransactionHistory;
    TransferNotification;
+ };
+type ImprintType = 
+ variant {
+   BlobContent: blob;
+   Nat16Content: nat16;
+   Nat32Content: nat32;
+   Nat64Content: nat64;
+   Nat8Content: nat8;
+   NatContent: nat;
+   TextContent: text;
+ };
+type ImprintResult = 
+ variant {
+   Err: ApiError;
+   Ok: Imprint;
+ };
+type Imprint = 
+ record {
+   createdBy: principal;
+   createdWhen: int;
+   data: ImprintType;
+   id: nat64;
+   tags: vec text;
  };
 type ExtendedMetadataResult = 
  variant {
@@ -99,7 +147,11 @@ type Dip721NonFungibleToken =
  };
 type ApiError = 
  variant {
+   IdDoubloninArray;
+   ImprintWithoutMark;
    InvalidArtworkId;
+   InvalidImprintId;
+   InvalidMarkId;
    InvalidTokenId;
    Other;
    Unauthorized;

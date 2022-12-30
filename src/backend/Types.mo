@@ -4,6 +4,10 @@ import Nat16 "mo:base/Nat16";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Blob "mo:base/Blob";
+import Time "mo:base/Time";
+import List "mo:base/List";
+//import Buffer "mo:stable-buffer/StableBuffer";
+
 import Principal "mo:base/Principal";
 
 module {
@@ -11,9 +15,9 @@ module {
   public type Artwork = {
     certifyBy : Principal;
     createdAt : Nat64;
-    idCreatorId : SandBlessId;
-    idCollection : SandBlessId;
-    idArtwork : SandBlessId;
+    idCreatorId : Nat64;
+    idCollection : Nat64;
+    idArtwork : Nat64;
     metadata : MetadataDesc;
   };
 
@@ -29,6 +33,10 @@ module {
     #InvalidTokenId;
     #InvalidArtworkId;
     #ZeroAddress;
+    #ImprintWithoutMark;
+    #InvalidMarkId;
+    #IdDoubloninArray;
+    #InvalidImprintId;
     #Other;
   };
 
@@ -42,7 +50,6 @@ module {
 
   public type TransactionId = Nat;
   public type TokenId = Nat64;
-  public type SandBlessId = Nat64;
 
   public type InterfaceId = {
     #Approval;
@@ -63,7 +70,44 @@ module {
     metadata : MetadataDesc;
   };
 
+  public type Mark = {
+    id : Nat64;
+    createdWhen : Int;
+    createdBy : Principal;
+  };
+
+  public type Imprint = {
+    id : Nat64;
+    createdWhen : Int;
+    createdBy : Principal;
+    tags : [Text];
+    data : ImprintType;
+  };
+
+  public type ImprintType = {
+    #TextContent : Text;
+    #BlobContent : Blob;
+    #NatContent : Nat;
+    #Nat8Content : Nat8;
+    #Nat16Content : Nat16;
+    #Nat32Content : Nat32;
+    #Nat64Content : Nat64;
+  };
+
+  public type MetadataMark = [MetadataMarkValue];
+
+  public type MetadataMarkValue = {
+    key : Text;
+    value : ImprintType;
+  };
+
   public type ExtendedMetadataResult = Result<{ metadata_desc : MetadataDesc; token_id : TokenId }, ApiError>;
+
+  public type MetadataMarkResult = Result<MetadataMark, ApiError>;
+
+  public type MarkResult = Result<Mark, ApiError>;
+
+  public type ImprintResult = Result<Imprint, ApiError>;
 
   public type MetadataResult = Result<MetadataDesc, ApiError>;
 

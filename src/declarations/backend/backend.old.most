@@ -3,12 +3,32 @@ type Artwork =
   {
     certifyBy : Principal;
     createdAt : Nat64;
-    idArtwork : SandBlessId;
-    idCollection : SandBlessId;
-    idCreatorId : SandBlessId;
+    idArtwork : Nat64;
+    idCollection : Nat64;
+    idCreatorId : Nat64;
     metadata : MetadataDesc
   };
+type Color = {#B; #R};
+type Imprint =
+  {
+    createdBy : Principal;
+    createdWhen : Int;
+    data : ImprintType;
+    id : Nat64;
+    tags : [Text]
+  };
+type ImprintType =
+  {
+    #BlobContent : Blob;
+    #Nat16Content : Nat16;
+    #Nat32Content : Nat32;
+    #Nat64Content : Nat64;
+    #Nat8Content : Nat8;
+    #NatContent : Nat;
+    #TextContent : Text
+  };
 type List<T> = ?(T, List<T>);
+type Mark = {createdBy : Principal; createdWhen : Int; id : Nat64};
 type MetadataDesc = [MetadataPart];
 type MetadataKeyVal = {key : Text; val : MetadataVal};
 type MetadataPart =
@@ -25,11 +45,39 @@ type MetadataVal =
     #TextContent : Text
   };
 type Nft = {id : TokenId; metadata : MetadataDesc; owner : Principal};
-type SandBlessId = Nat64;
 type TokenId = Nat64;
+type Tree<K, V> = {#leaf; #node : (Color, Tree<K, V>, (K, ?V), Tree<K, V>)};
 actor {
   stable var artworks : ?(Artwork, List<Artwork>);
+  stable var imprintIdsByMarkId :
+    {
+      #leaf;
+      #node :
+        (Color, Tree<Nat64, [Nat64]>, (Nat64, ?[Nat64]),
+         Tree<Nat64, [Nat64]>)
+    };
+  stable var imprints :
+    {
+      #leaf;
+      #node :
+        (Color, Tree<Nat64, Imprint>, (Nat64, ?Imprint),
+         Tree<Nat64, Imprint>)
+    };
+  stable var imprintsCounter : Nat64;
   stable var logo : {data : Text; logo_type : Text};
+  stable var markIdsByImprintId :
+    {
+      #leaf;
+      #node :
+        (Color, Tree<Nat64, [Nat64]>, (Nat64, ?[Nat64]),
+         Tree<Nat64, [Nat64]>)
+    };
+  stable var marks :
+    {
+      #leaf;
+      #node : (Color, Tree<Nat64, Mark>, (Nat64, ?Mark), Tree<Nat64, Mark>)
+    };
+  stable var marksCounter : Nat64;
   stable var maxLimit : Nat16;
   stable var name : Text;
   stable var nfts : ?(Nft, List<Nft>);

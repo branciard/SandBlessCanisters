@@ -33,11 +33,13 @@
     "@dfinity/identity": "^0.12.2",
     "@dfinity/principal": "^0.12.2",
     "@rgossiaux/svelte-headlessui": "^1.0.2",
+    "blob-util": "^2.0.2",
     "ipfs-core": "^0.17.0",
+    "moment": "^2.29.4",
     "qrcode": "^1.5.0",
     "sirv-cli": "^1.0.0",
     "svelte-asyncable": "^2.1.0",
     "svelte-icons": "^2.1.0",
-    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.17"
+    "tailwindcss": "^3.2.4"
   }
 }
