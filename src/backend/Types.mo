@@ -6,8 +6,6 @@ import Nat64 "mo:base/Nat64";
 import Blob "mo:base/Blob";
 import Time "mo:base/Time";
 import List "mo:base/List";
-//import Buffer "mo:stable-buffer/StableBuffer";
-
 import Principal "mo:base/Principal";
 
 module {
@@ -36,11 +34,11 @@ module {
     id : Nat64;
     createdWhen : Int;
     createdBy : Principal;
-    tags : [Text];
-    data : ImprintType;
+    imprintType : Text;
+    imprintData : ImprintData;
   };
 
-  public type ImprintType = {
+  public type ImprintData = {
     #TextContent : Text;
     #BlobContent : Blob;
     #NatContent : Nat;

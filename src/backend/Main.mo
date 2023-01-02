@@ -71,6 +71,16 @@ shared actor class SandBless() = Self {
     };
   };
 
+  public shared ({ caller }) func purgeCanister() : async Bool {
+    marksCounter := 0;
+    marks := RBTree.init<Nat64, Types.Mark>();
+    imprintsCounter := 0;
+    imprints := RBTree.init<Nat64, Types.Imprint>();
+    imprintIdsByMarkId := RBTree.init<Nat64, [Nat64]>();
+    markIdsByImprintId := RBTree.init<Nat64, [Nat64]>();
+    return true;
+  };
+
   public query func getMark(markId : Nat64) : async Types.MarkResult {
     let mark : ?Types.Mark = RBTree.get(marks, Nat64.compare, markId);
     switch (mark) {
@@ -123,7 +133,7 @@ shared actor class SandBless() = Self {
     return mark;
   };
 
-  public shared ({ caller }) func createImprint(markIds : [Nat64], data : Types.ImprintType, tags : [Text]) : async Types.ImprintResult {
+  public shared ({ caller }) func createImprint(markIds : [Nat64], imprintType : Text, imprintData : Types.ImprintData) : async Types.ImprintResult {
 
     //Check at least one mark to update
     if (markIds.size() == 0) {
@@ -135,17 +145,6 @@ shared actor class SandBless() = Self {
       let markIdsToSet = TrieSet.fromArray(markIds, nat64Hash, Nat64.equal);
       let markIdsToSetSize = TrieSet.size(markIdsToSet);
       if (markIdsToSetSize != markIds.size()) {
-        return #Err(#IdDoubloninArray);
-      };
-    } catch (e) {
-      return #Err(#IdDoubloninArray);
-    };
-
-    //check doublon in tags
-    try {
-      let tagsToSet = TrieSet.fromArray(tags, Text.hash, Text.equal);
-      let tagsToSetSize = TrieSet.size(tagsToSet);
-      if (tagsToSetSize != tags.size()) {
         return #Err(#IdDoubloninArray);
       };
     } catch (e) {
@@ -166,8 +165,8 @@ shared actor class SandBless() = Self {
       id = imprintsCounter;
       createdWhen = Time.now();
       createdBy = caller;
-      tags = tags;
-      data = data;
+      imprintType = imprintType;
+      imprintData = imprintData;
     };
 
     // markIdsByImprintId updates

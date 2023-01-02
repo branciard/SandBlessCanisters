@@ -4,11 +4,11 @@ type Imprint =
   {
     createdBy : Principal;
     createdWhen : Int;
-    data : ImprintType;
     id : Nat64;
-    tags : [Text]
+    imprintData : ImprintData;
+    imprintType : Text
   };
-type ImprintType =
+type ImprintData =
   {
     #BlobContent : Blob;
     #Nat16Content : Nat16;

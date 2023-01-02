@@ -1,5 +1,5 @@
 export const idlFactory = ({ IDL }) => {
-  const ImprintType = IDL.Variant({
+  const ImprintData = IDL.Variant({
     'Nat64Content' : IDL.Nat64,
     'Nat32Content' : IDL.Nat32,
     'Nat8Content' : IDL.Nat8,
@@ -10,10 +10,10 @@ export const idlFactory = ({ IDL }) => {
   });
   const Imprint = IDL.Record({
     'id' : IDL.Nat64,
-    'data' : ImprintType,
     'createdBy' : IDL.Principal,
-    'tags' : IDL.Vec(IDL.Text),
     'createdWhen' : IDL.Int,
+    'imprintData' : ImprintData,
+    'imprintType' : IDL.Text,
   });
   const ApiError = IDL.Variant({
     'InvalidMarkId' : IDL.Null,
@@ -32,7 +32,7 @@ export const idlFactory = ({ IDL }) => {
   const MarkResult = IDL.Variant({ 'Ok' : Mark, 'Err' : ApiError });
   const SandBless = IDL.Service({
     'createImprint' : IDL.Func(
-        [IDL.Vec(IDL.Nat64), ImprintType, IDL.Vec(IDL.Text)],
+        [IDL.Vec(IDL.Nat64), IDL.Text, ImprintData],
         [ImprintResult],
         [],
       ),
@@ -57,6 +57,7 @@ export const idlFactory = ({ IDL }) => {
     'getMarksTreeSize' : IDL.Func([], [IDL.Nat], ['query']),
     'isImprintExist' : IDL.Func([IDL.Nat64], [IDL.Bool], ['query']),
     'isMarkExist' : IDL.Func([IDL.Nat64], [IDL.Bool], ['query']),
+    'purgeCanister' : IDL.Func([], [IDL.Bool], []),
     'whoami' : IDL.Func([], [IDL.Principal], ['query']),
   });
   return SandBless;

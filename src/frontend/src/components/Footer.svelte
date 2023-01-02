@@ -68,7 +68,7 @@
   </div>
 
   <div class="flex w-full items-stretch">
-    <p class="py-12">
+    <p class="py-18">
       FRANCOIS BRANCIARD - GRAVURE - CISELURE - APRM 2313ZC - APET 9003A - SIRET
       84862922600012 - TVA FR82848629226 - 136 RUE DE LA COMBE VINEUSE 71570
       PRUZILLY FRANCE

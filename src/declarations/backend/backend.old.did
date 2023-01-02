@@ -9,7 +9,12 @@ type Mark =
    createdWhen: int;
    id: nat64;
  };
-type ImprintType = 
+type ImprintResult = 
+ variant {
+   Err: ApiError;
+   Ok: Imprint;
+ };
+type ImprintData = 
  variant {
    BlobContent: blob;
    Nat16Content: nat16;
@@ -19,18 +24,13 @@ type ImprintType =
    NatContent: nat;
    TextContent: text;
  };
-type ImprintResult = 
- variant {
-   Err: ApiError;
-   Ok: Imprint;
- };
 type Imprint = 
  record {
    createdBy: principal;
    createdWhen: int;
-   data: ImprintType;
    id: nat64;
-   tags: vec text;
+   imprintData: ImprintData;
+   imprintType: text;
  };
 type ApiError = 
  variant {
@@ -42,7 +42,7 @@ type ApiError =
    Unauthorized;
  };
 service : {
-  createImprint: (vec nat64, ImprintType, vec text) -> (ImprintResult);
+  createImprint: (vec nat64, text, ImprintData) -> (ImprintResult);
   createMark: () -> (Mark);
   getImprint: (nat64) -> (ImprintResult) query;
   getImprintIdsByMarkId: (nat64) -> (opt vec nat64) query;
@@ -56,5 +56,6 @@ service : {
   getMarksTreeSize: () -> (nat) query;
   isImprintExist: (nat64) -> (bool) query;
   isMarkExist: (nat64) -> (bool) query;
+  purgeCanister: () -> (bool) query;
   whoami: () -> (principal) query;
 }

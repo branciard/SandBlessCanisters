@@ -9,20 +9,20 @@ export type ApiError = { 'InvalidMarkId' : null } |
   { 'Other' : null };
 export interface Imprint {
   'id' : bigint,
-  'data' : ImprintType,
   'createdBy' : Principal,
-  'tags' : Array<string>,
   'createdWhen' : bigint,
+  'imprintData' : ImprintData,
+  'imprintType' : string,
 }
-export type ImprintResult = { 'Ok' : Imprint } |
-  { 'Err' : ApiError };
-export type ImprintType = { 'Nat64Content' : bigint } |
+export type ImprintData = { 'Nat64Content' : bigint } |
   { 'Nat32Content' : number } |
   { 'Nat8Content' : number } |
   { 'NatContent' : bigint } |
   { 'Nat16Content' : number } |
   { 'BlobContent' : Uint8Array } |
   { 'TextContent' : string };
+export type ImprintResult = { 'Ok' : Imprint } |
+  { 'Err' : ApiError };
 export interface Mark {
   'id' : bigint,
   'createdBy' : Principal,
@@ -32,7 +32,7 @@ export type MarkResult = { 'Ok' : Mark } |
   { 'Err' : ApiError };
 export interface SandBless {
   'createImprint' : ActorMethod<
-    [BigUint64Array, ImprintType, Array<string>],
+    [BigUint64Array, string, ImprintData],
     ImprintResult
   >,
   'createMark' : ActorMethod<[], Mark>,
@@ -48,6 +48,7 @@ export interface SandBless {
   'getMarksTreeSize' : ActorMethod<[], bigint>,
   'isImprintExist' : ActorMethod<[bigint], boolean>,
   'isMarkExist' : ActorMethod<[bigint], boolean>,
+  'purgeCanister' : ActorMethod<[], boolean>,
   'whoami' : ActorMethod<[], Principal>,
 }
 export interface _SERVICE extends SandBless {}
