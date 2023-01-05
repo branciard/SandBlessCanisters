@@ -1,6 +1,7 @@
 import Hash "mo:base/Hash";
 import Nat64 "mo:base/Nat64";
 import Text "mo:base/Text";
+import Bool "mo:base/Bool";
 import TrieSet "mo:base/TrieSet";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
@@ -133,7 +134,59 @@ shared actor class SandBless() = Self {
     return mark;
   };
 
-  public shared ({ caller }) func createImprint(markIds : [Nat64], imprintType : Text, imprintData : Types.ImprintData) : async Types.ImprintResult {
+  public shared ({ caller }) func setImprintVisible(imprintId : Nat64) : async Types.ImprintResult {
+    let imprint : ?Types.Imprint = RBTree.get(imprints, Nat64.compare, imprintId);
+    switch (imprint) {
+      case null {
+        return #Err(#InvalidImprintId);
+      };
+      case (?imprint) {
+        let imprintToUpdate : Types.Imprint = {
+          id = imprint.id;
+          createdWhen = imprint.createdWhen;
+          createdBy = imprint.createdBy;
+          imprintType = imprint.imprintType;
+          imprintData = imprint.imprintData;
+          visible = true;
+        };
+        let (imprintsEntry, imprintsUpdated) = RBTree.replace(imprints, Nat64.compare, imprint.id, imprintToUpdate);
+        if (Option.isSome(imprintsEntry)) {
+          imprints := imprintsUpdated;
+        } else {
+          imprints := RBTree.put(imprints, Nat64.compare, imprint.id, imprintToUpdate);
+        };
+        return #Ok(imprintToUpdate);
+      };
+    };
+  };
+
+  public shared ({ caller }) func setImprintInvisible(imprintId : Nat64) : async Types.ImprintResult {
+    let imprint : ?Types.Imprint = RBTree.get(imprints, Nat64.compare, imprintId);
+    switch (imprint) {
+      case null {
+        return #Err(#InvalidImprintId);
+      };
+      case (?imprint) {
+        let imprintToUpdate : Types.Imprint = {
+          id = imprint.id;
+          createdWhen = imprint.createdWhen;
+          createdBy = imprint.createdBy;
+          imprintType = imprint.imprintType;
+          imprintData = imprint.imprintData;
+          visible = false;
+        };
+        let (imprintsEntry, imprintsUpdated) = RBTree.replace(imprints, Nat64.compare, imprint.id, imprintToUpdate);
+        if (Option.isSome(imprintsEntry)) {
+          imprints := imprintsUpdated;
+        } else {
+          imprints := RBTree.put(imprints, Nat64.compare, imprint.id, imprintToUpdate);
+        };
+        return #Ok(imprintToUpdate);
+      };
+    };
+  };
+
+  public shared ({ caller }) func createImprint(markIds : [Nat64], imprintType : Nat64, imprintData : Types.ImprintData) : async Types.ImprintResult {
 
     //Check at least one mark to update
     if (markIds.size() == 0) {
@@ -167,15 +220,15 @@ shared actor class SandBless() = Self {
       createdBy = caller;
       imprintType = imprintType;
       imprintData = imprintData;
+      visible = true;
     };
 
     // markIdsByImprintId updates
-    // choice : allways trust counter to populate or replace over tree structure.
-    let (markIdsByImprintIdEntry, markIdsByImprintIdUpdated) = RBTree.replace(markIdsByImprintId, Nat64.compare, imprintsCounter, markIds);
+    let (markIdsByImprintIdEntry, markIdsByImprintIdUpdated) = RBTree.replace(markIdsByImprintId, Nat64.compare, imprint.id, markIds);
     if (Option.isSome(markIdsByImprintIdEntry)) {
       markIdsByImprintId := markIdsByImprintIdUpdated;
     } else {
-      markIdsByImprintId := RBTree.put(markIdsByImprintId, Nat64.compare, imprintsCounter, markIds);
+      markIdsByImprintId := RBTree.put(markIdsByImprintId, Nat64.compare, imprint.id, markIds);
     };
 
     // imprintIdsByMarkId updates
@@ -194,7 +247,6 @@ shared actor class SandBless() = Self {
         case (?imprintIdsByMarkIdValues) {
           let buffer = StableBuffer.fromArray<Nat64>(imprintIdsByMarkIdValues);
           StableBuffer.add(buffer, imprintsCounter);
-          // choice : allways trust counter to populate or replace over tree structure.
           let (imprintIdsByMarkIdIdEntry, imprintIdsByMarkIdUpdated) = RBTree.replace(imprintIdsByMarkId, Nat64.compare, markId, StableBuffer.toArray(buffer));
           if (Option.isSome(imprintIdsByMarkIdIdEntry)) {
             imprintIdsByMarkId := imprintIdsByMarkIdUpdated;
@@ -205,12 +257,11 @@ shared actor class SandBless() = Self {
       };
     };
 
-    // choice : allways trust counter to populate or replace over tree structure.
-    let (imprintsEntry, imprintsUpdated) = RBTree.replace(imprints, Nat64.compare, imprintsCounter, imprint);
+    let (imprintsEntry, imprintsUpdated) = RBTree.replace(imprints, Nat64.compare, imprint.id, imprint);
     if (Option.isSome(imprintsEntry)) {
       imprints := imprintsUpdated;
     } else {
-      imprints := RBTree.put(imprints, Nat64.compare, imprintsCounter, imprint);
+      imprints := RBTree.put(imprints, Nat64.compare, imprint.id, imprint);
     };
 
     return #Ok(imprint);

@@ -12,7 +12,8 @@ export interface Imprint {
   'createdBy' : Principal,
   'createdWhen' : bigint,
   'imprintData' : ImprintData,
-  'imprintType' : string,
+  'imprintType' : bigint,
+  'visible' : boolean,
 }
 export type ImprintData = { 'Nat64Content' : bigint } |
   { 'Nat32Content' : number } |
@@ -32,7 +33,7 @@ export type MarkResult = { 'Ok' : Mark } |
   { 'Err' : ApiError };
 export interface SandBless {
   'createImprint' : ActorMethod<
-    [BigUint64Array, string, ImprintData],
+    [BigUint64Array, bigint, ImprintData],
     ImprintResult
   >,
   'createMark' : ActorMethod<[], Mark>,
@@ -49,6 +50,8 @@ export interface SandBless {
   'isImprintExist' : ActorMethod<[bigint], boolean>,
   'isMarkExist' : ActorMethod<[bigint], boolean>,
   'purgeCanister' : ActorMethod<[], boolean>,
+  'setImprintInvisible' : ActorMethod<[bigint], ImprintResult>,
+  'setImprintVisible' : ActorMethod<[bigint], ImprintResult>,
   'whoami' : ActorMethod<[], Principal>,
 }
 export interface _SERVICE extends SandBless {}

@@ -1,6 +1,6 @@
 type SandBless = 
  service {
-   createImprint: (vec nat64, text, ImprintData) -> (ImprintResult);
+   createImprint: (vec nat64, nat64, ImprintData) -> (ImprintResult);
    createMark: () -> (Mark);
    getImprint: (nat64) -> (ImprintResult) query;
    getImprintIdsByMarkId: (nat64) -> (opt vec nat64) query;
@@ -15,6 +15,8 @@ type SandBless =
    isImprintExist: (nat64) -> (bool) query;
    isMarkExist: (nat64) -> (bool) query;
    purgeCanister: () -> (bool);
+   setImprintInvisible: (nat64) -> (ImprintResult);
+   setImprintVisible: (nat64) -> (ImprintResult);
    whoami: () -> (principal) query;
  };
 type MarkResult = 
@@ -49,7 +51,8 @@ type Imprint =
    createdWhen: int;
    id: nat64;
    imprintData: ImprintData;
-   imprintType: text;
+   imprintType: nat64;
+   visible: bool;
  };
 type ApiError = 
  variant {

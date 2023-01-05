@@ -6,7 +6,7 @@
 
 <div class="max-w-sm rounded overflow-hidden shadow-lg">
   <div class="px-6 py-4">
-    {#if type === 'ImageIPFS'}
+    {#if type == 2}
       <ImageIPFSGateway
         gateway="https://gateway.pinata.cloud/ipfs/"
         cid={data.TextContent}

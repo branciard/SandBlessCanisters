@@ -34,8 +34,9 @@ module {
     id : Nat64;
     createdWhen : Int;
     createdBy : Principal;
-    imprintType : Text;
+    imprintType : Nat64;
     imprintData : ImprintData;
+    visible : Bool;
   };
 
   public type ImprintData = {

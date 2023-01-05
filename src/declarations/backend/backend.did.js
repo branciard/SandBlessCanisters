@@ -13,7 +13,8 @@ export const idlFactory = ({ IDL }) => {
     'createdBy' : IDL.Principal,
     'createdWhen' : IDL.Int,
     'imprintData' : ImprintData,
-    'imprintType' : IDL.Text,
+    'imprintType' : IDL.Nat64,
+    'visible' : IDL.Bool,
   });
   const ApiError = IDL.Variant({
     'InvalidMarkId' : IDL.Null,
@@ -32,7 +33,7 @@ export const idlFactory = ({ IDL }) => {
   const MarkResult = IDL.Variant({ 'Ok' : Mark, 'Err' : ApiError });
   const SandBless = IDL.Service({
     'createImprint' : IDL.Func(
-        [IDL.Vec(IDL.Nat64), IDL.Text, ImprintData],
+        [IDL.Vec(IDL.Nat64), IDL.Nat64, ImprintData],
         [ImprintResult],
         [],
       ),
@@ -58,6 +59,8 @@ export const idlFactory = ({ IDL }) => {
     'isImprintExist' : IDL.Func([IDL.Nat64], [IDL.Bool], ['query']),
     'isMarkExist' : IDL.Func([IDL.Nat64], [IDL.Bool], ['query']),
     'purgeCanister' : IDL.Func([], [IDL.Bool], []),
+    'setImprintInvisible' : IDL.Func([IDL.Nat64], [ImprintResult], []),
+    'setImprintVisible' : IDL.Func([IDL.Nat64], [ImprintResult], []),
     'whoami' : IDL.Func([], [IDL.Principal], ['query']),
   });
   return SandBless;

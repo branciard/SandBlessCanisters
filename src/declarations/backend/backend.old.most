@@ -6,7 +6,7 @@ type Imprint =
     createdWhen : Int;
     id : Nat64;
     imprintData : ImprintData;
-    imprintType : Text
+    imprintType : Nat64
   };
 type ImprintData =
   {
