@@ -1,8 +1,11 @@
 import Hash "mo:base/Hash";
 import Nat64 "mo:base/Nat64";
 import Text "mo:base/Text";
+import Iter "mo:base/Iter";
+import Array "mo:base/Array";
 import Bool "mo:base/Bool";
 import TrieSet "mo:base/TrieSet";
+import List "mo:base/List";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
@@ -10,7 +13,24 @@ import StableBuffer "mo:stable-buffer/StableBuffer";
 import RBTree "mo:stable-rbtree/StableRBTree";
 import Types "./Types";
 
-shared actor class SandBless() = Self {
+shared ({ caller }) actor class SandBless(initialArgs : Types.InitialArgs) = Self {
+
+  private stable var custodians = RBTree.init<Text, Bool>();
+
+  let (custodianEntryUpdated, custodiansFromUpdate) = RBTree.replace(custodians, Text.compare, Principal.toText(caller), true);
+  if (Option.isSome(custodianEntryUpdated)) {
+    custodians := custodiansFromUpdate;
+  } else {
+    custodians := RBTree.put(custodians, Text.compare, Principal.toText(caller), true);
+  };
+  for (custodian in initialArgs.custodians.vals()) {
+    let (custodianEntryUpdated, custodiansFromUpdate) = RBTree.replace(custodians, Text.compare, Principal.toText(custodian.custodianPrincipal), true);
+    if (Option.isSome(custodianEntryUpdated)) {
+      custodians := custodiansFromUpdate;
+    } else {
+      custodians := RBTree.put(custodians, Text.compare, Principal.toText(custodian.custodianPrincipal), true);
+    };
+  };
 
   private stable var marksCounter : Nat64 = 0;
   private stable var marks = RBTree.init<Nat64, Types.Mark>();
@@ -28,6 +48,10 @@ shared actor class SandBless() = Self {
 
   public shared query (msg) func whoami() : async Principal {
     return msg.caller;
+  };
+
+  public shared query (msg) func whoamiTextformat() : async Text {
+    return Principal.toText(msg.caller);
   };
 
   public query func getMarksTotalCount() : async Nat64 {
@@ -54,12 +78,52 @@ shared actor class SandBless() = Self {
     return RBTree.size(markIdsByImprintId);
   };
 
+  public query func getCustodiansTreeSize() : async Nat {
+    return RBTree.size(custodians);
+  };
+
+  public query func isPrincipalCustodian(principal : Principal) : async Bool {
+    let custodian : ?Bool = RBTree.get(custodians, Text.compare, Principal.toText(principal));
+    switch (custodian) {
+      case null {
+        return false;
+      };
+      case (?custodian) {
+        return true;
+      };
+    };
+  };
+
+  public query func isCustodian(principal : Text) : async Bool {
+    let custodian : ?Bool = RBTree.get(custodians, Text.compare, principal);
+    switch (custodian) {
+      case null {
+        return false;
+      };
+      case (?custodian) {
+        return true;
+      };
+    };
+  };
+
+  public query func getCustodians() : async [(Text, Bool)] {
+    return Iter.toArray(RBTree.entries(custodians));
+  };
+
   public query func getImprintIdsByMarkId(markId : Nat64) : async ?[Nat64] {
     return RBTree.get(imprintIdsByMarkId, Nat64.compare, markId);
   };
 
+  public query func getImprintIdsByMarkIdTree() : async [(Nat64, [Nat64])] {
+    return Iter.toArray(RBTree.entries(imprintIdsByMarkId));
+  };
+
   public query func getMarkIdsByImprintId(imprintId : Nat64) : async ?[Nat64] {
     return RBTree.get(markIdsByImprintId, Nat64.compare, imprintId);
+  };
+
+  public query func getMarkIdsByImprintIdTree() : async [(Nat64, [Nat64])] {
+    return Iter.toArray(RBTree.entries(markIdsByImprintId));
   };
 
   public query func isMarkExist(markId : Nat64) : async Bool {
@@ -72,14 +136,59 @@ shared actor class SandBless() = Self {
     };
   };
 
+  public shared ({ caller }) func addCustodian(newCustodian : Text) : async Bool {
+    let custodian : ?Bool = RBTree.get(custodians, Text.compare, Principal.toText(caller));
+    switch (custodian) {
+      case null {
+        return false;
+      };
+      case (?custodian) {
+        let (custodianEntryUpdated, custodiansFromUpdate) = RBTree.replace(custodians, Text.compare, newCustodian, true);
+        if (Option.isSome(custodianEntryUpdated)) {
+          custodians := custodiansFromUpdate;
+        } else {
+          custodians := RBTree.put(custodians, Text.compare, newCustodian, true);
+        };
+        return true;
+      };
+    };
+  };
+
+  public shared ({ caller }) func removeCustodian(custodianToRemove : Text) : async Bool {
+    let custodian : ?Bool = RBTree.get(custodians, Text.compare, Principal.toText(caller));
+    switch (custodian) {
+      case null {
+        return false;
+      };
+      case (?custodian) {
+        let (custodianEntryRemoved, custodiansFromRemove) = RBTree.remove(custodians, Text.compare, custodianToRemove);
+        if (Option.isSome(custodianEntryRemoved)) {
+          custodians := custodiansFromRemove;
+          return true;
+        } else {
+          return false;
+        };
+      };
+    };
+  };
+
   public shared ({ caller }) func purgeCanister() : async Bool {
-    marksCounter := 0;
-    marks := RBTree.init<Nat64, Types.Mark>();
-    imprintsCounter := 0;
-    imprints := RBTree.init<Nat64, Types.Imprint>();
-    imprintIdsByMarkId := RBTree.init<Nat64, [Nat64]>();
-    markIdsByImprintId := RBTree.init<Nat64, [Nat64]>();
-    return true;
+    let custodian : ?Bool = RBTree.get(custodians, Text.compare, Principal.toText(caller));
+    switch (custodian) {
+      case null {
+        return false;
+      };
+      case (?custodian) {
+        marksCounter := 0;
+        marks := RBTree.init<Nat64, Types.Mark>();
+        imprintsCounter := 0;
+        imprints := RBTree.init<Nat64, Types.Imprint>();
+        imprintIdsByMarkId := RBTree.init<Nat64, [Nat64]>();
+        markIdsByImprintId := RBTree.init<Nat64, [Nat64]>();
+        custodians := RBTree.init<Text, Bool>();
+        return true;
+      };
+    };
   };
 
   public query func getMark(markId : Nat64) : async Types.MarkResult {
@@ -116,7 +225,7 @@ shared actor class SandBless() = Self {
     };
   };
 
-  public shared ({ caller }) func createMark() : async Types.Mark {
+  public shared ({ caller }) func createMark() : async Types.MarkResult {
     marksCounter += 1;
     let mark : Types.Mark = {
       id = marksCounter;
@@ -131,10 +240,11 @@ shared actor class SandBless() = Self {
       marks := RBTree.put(marks, Nat64.compare, marksCounter, mark);
     };
 
-    return mark;
+    return #Ok(mark);
   };
 
   public shared ({ caller }) func setImprintVisible(imprintId : Nat64) : async Types.ImprintResult {
+
     let imprint : ?Types.Imprint = RBTree.get(imprints, Nat64.compare, imprintId);
     switch (imprint) {
       case null {
@@ -161,6 +271,7 @@ shared actor class SandBless() = Self {
   };
 
   public shared ({ caller }) func setImprintInvisible(imprintId : Nat64) : async Types.ImprintResult {
+
     let imprint : ?Types.Imprint = RBTree.get(imprints, Nat64.compare, imprintId);
     switch (imprint) {
       case null {

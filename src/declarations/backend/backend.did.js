@@ -1,4 +1,10 @@
 export const idlFactory = ({ IDL }) => {
+  const Custodian = IDL.Record({ 'custodianPrincipal' : IDL.Principal });
+  const CustodianList = IDL.Vec(Custodian);
+  const InitialArgs = IDL.Record({
+    'createdBy' : IDL.Principal,
+    'custodians' : CustodianList,
+  });
   const ImprintData = IDL.Variant({
     'Nat64Content' : IDL.Nat64,
     'Nat32Content' : IDL.Nat32,
@@ -32,16 +38,28 @@ export const idlFactory = ({ IDL }) => {
   });
   const MarkResult = IDL.Variant({ 'Ok' : Mark, 'Err' : ApiError });
   const SandBless = IDL.Service({
+    'addCustodian' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'createImprint' : IDL.Func(
         [IDL.Vec(IDL.Nat64), IDL.Nat64, ImprintData],
         [ImprintResult],
         [],
       ),
-    'createMark' : IDL.Func([], [Mark], []),
+    'createMark' : IDL.Func([], [MarkResult], []),
+    'getCustodians' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Bool))],
+        ['query'],
+      ),
+    'getCustodiansTreeSize' : IDL.Func([], [IDL.Nat], ['query']),
     'getImprint' : IDL.Func([IDL.Nat64], [ImprintResult], ['query']),
     'getImprintIdsByMarkId' : IDL.Func(
         [IDL.Nat64],
         [IDL.Opt(IDL.Vec(IDL.Nat64))],
+        ['query'],
+      ),
+    'getImprintIdsByMarkIdTree' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Nat64, IDL.Vec(IDL.Nat64)))],
         ['query'],
       ),
     'getImprintIdsByMarkIdTreeSize' : IDL.Func([], [IDL.Nat], ['query']),
@@ -53,16 +71,33 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(IDL.Vec(IDL.Nat64))],
         ['query'],
       ),
+    'getMarkIdsByImprintIdTree' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Nat64, IDL.Vec(IDL.Nat64)))],
+        ['query'],
+      ),
     'getMarkIdsByImprintIdTreeSize' : IDL.Func([], [IDL.Nat], ['query']),
     'getMarksTotalCount' : IDL.Func([], [IDL.Nat64], ['query']),
     'getMarksTreeSize' : IDL.Func([], [IDL.Nat], ['query']),
+    'isCustodian' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
     'isImprintExist' : IDL.Func([IDL.Nat64], [IDL.Bool], ['query']),
     'isMarkExist' : IDL.Func([IDL.Nat64], [IDL.Bool], ['query']),
+    'isPrincipalCustodian' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
     'purgeCanister' : IDL.Func([], [IDL.Bool], []),
+    'removeCustodian' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'setImprintInvisible' : IDL.Func([IDL.Nat64], [ImprintResult], []),
     'setImprintVisible' : IDL.Func([IDL.Nat64], [ImprintResult], []),
     'whoami' : IDL.Func([], [IDL.Principal], ['query']),
+    'whoamiTextformat' : IDL.Func([], [IDL.Text], ['query']),
   });
   return SandBless;
 };
-export const init = ({ IDL }) => { return []; };
+export const init = ({ IDL }) => {
+  const Custodian = IDL.Record({ 'custodianPrincipal' : IDL.Principal });
+  const CustodianList = IDL.Vec(Custodian);
+  const InitialArgs = IDL.Record({
+    'createdBy' : IDL.Principal,
+    'custodians' : CustodianList,
+  });
+  return [InitialArgs];
+};

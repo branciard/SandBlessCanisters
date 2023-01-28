@@ -3,6 +3,7 @@
   import ImprintType from '../components/ImprintType.svelte';
 
   import { AuthClient } from '@dfinity/auth-client';
+  import { Principal } from '@dfinity/principal';
   import { auth, createActor } from '../store/auth';
   import { IMPRINT_TYPE_ENUM } from '../store/constants';
   import { onMount } from 'svelte';
@@ -28,9 +29,6 @@
   let showNewImprintCreated = false;
   let newImprintCreatedError = null;
 
-  let currentMarksTotalCount = BigInt(0);
-  let currentImprintsTotalCount = BigInt(0);
-
   // intpus froms
   let imprintTypeSelect = [
     { id: 1, text: IMPRINT_TYPE_ENUM[1] },
@@ -50,6 +48,9 @@
   const inputsAssociatedMarks = writable([]);
 
   let inputVisibilityValue;
+
+  let inputAddCustodianValue;
+  let inputRemoveCustodianValue;
 
   function isNumeric(str) {
     if (typeof str != 'string') return false; // we only process strings!
@@ -92,8 +93,6 @@
       newMarkCreated = false;
       newImprintCreated = false;
       newImprintCreatedError = null;
-      currentMarksTotalCount = await $auth.actor.getMarksTotalCount();
-      currentImprintsTotalCount = await $auth.actor.getImprintsTotalCount();
     }
   });
 
@@ -170,14 +169,16 @@
       let result = await $auth.actor.createMark();
       console.log('createMark result:');
       console.log(result);
-      try {
-        const markId = BigInt(result.id);
-        await getMarkAndloadPage(markId);
-        currentMarksTotalCount = await $auth.actor.getMarksTotalCount();
-        newMarkCreated = true;
-      } catch (e) {
-        console.log(e);
-        console.log('fail to get mark created');
+      if (result.Ok) {
+        console.log('OK :');
+        try {
+          const markId = BigInt(result.Ok.id);
+          await getMarkAndloadPage(markId);
+          newMarkCreated = true;
+        } catch (e) {
+          console.log(e);
+          console.log('fail to get mark created');
+        }
       }
     }
   }
@@ -221,7 +222,6 @@
         console.log('OK :');
         try {
           await getImprint(result.Ok.id);
-          currentImprintsTotalCount = await $auth.actor.getImprintsTotalCount();
           newImprintCreated = true;
         } catch (e) {
           console.log(e);
@@ -308,6 +308,24 @@
     console.log(result);
   }
 
+  async function addCustodian(inputAddCustodianValue) {
+    if ($auth.loggedIn) {
+      console.log('addCustodian');
+      let result = await $auth.actor.addCustodian(inputAddCustodianValue);
+      console.log('addCustodian result');
+      console.log(result);
+    }
+  }
+
+  async function removeCustodian(inputRemoveCustodianValue) {
+    if ($auth.loggedIn) {
+      console.log('removeCustodian');
+      let result = await $auth.actor.removeCustodian(inputRemoveCustodianValue);
+      console.log('removeCustodian result');
+      console.log(result);
+    }
+  }
+
   async function isMarkExist(markId) {
     console.log('isMarkExist:' + markId);
     if (markId) {
@@ -357,10 +375,18 @@
             associé en ligne.
 
             <br />
-            A ce jour, un total de <b> {BigInt(currentMarksTotalCount)}</b>
+            A ce jour, un total de
+            <b>
+              {#await $auth.actor.getMarksTotalCount() then totalMarks}
+                {totalMarks}
+              {/await}
+            </b>
             marquages uniques Sand Bless ont été gravés et référencés et
-            <b> {BigInt(currentImprintsTotalCount)}</b> empreintes ont été ajoutées
-            sur ces marquages.
+            <b>
+              {#await $auth.actor.getImprintsTotalCount() then totalImprints}
+                {totalImprints}
+              {/await}
+            </b> empreintes ont été ajoutées. sur ces marquages.
           </div>
           <!-- end centered content -->
         </div>
@@ -455,15 +481,18 @@
 
                 <div class="grid grid-cols-1 divide-y">
                   <div class="py-4">
-                    {#await $auth.actor.whoami()}
+                    {#await $auth.actor.whoamiTextformat()}
                       Querying caller identity...
                     {:then principalResult}
                       <div>Principal :</div>
                       <div>
                         <code>{principalResult}</code>
-                        {#if principalResult.isAnonymous()}
-                          (anonymous)
-                        {/if}
+                        <br />
+                        Administrateur :
+
+                        {#await $auth.actor.isCustodian(principalResult) then isPrincipalCustodianResult2}
+                          {isPrincipalCustodianResult2}
+                        {/await}
                       </div>
                     {/await}
                     <div>
@@ -494,9 +523,9 @@
                             class="success-alert"
                             transition:fade={{ duration: 150 }}
                           >
-                            Nouveau marquage numéro {BigInt(
-                              currentMarksTotalCount
-                            )} créé !
+                            Nouveau marquage numéro {#await $auth.actor.getMarksTotalCount() then totalMarks}
+                              {totalMarks}
+                            {/await} créé !
                           </span>
                         {/if}
                       </form>
@@ -630,9 +659,9 @@
                             class="success-alert"
                             transition:fade={{ duration: 150 }}
                           >
-                            Nouvelle empreinte numéro {BigInt(
-                              currentImprintsTotalCount
-                            )} créée sur le(s) marquages {$inputsAssociatedMarks}
+                            Nouvelle empreinte numéro {#await $auth.actor.getImprintsTotalCount() then totalImprints}
+                              {totalImprints}
+                            {/await} créée sur le(s) marquages {$inputsAssociatedMarks}
                             !
                           </span>
                         {/if}
@@ -676,6 +705,82 @@
                             on:click={setImprintInvisible(inputVisibilityValue)}
                           >
                             Forcer à invisible
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+
+                    <div class="py-4">
+                      <h5
+                        class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+                      >
+                        {#await $auth.actor.getCustodiansTreeSize() then getCustodiansTreeSizeResult}
+                          {getCustodiansTreeSizeResult}
+                        {/await} Administrateurs
+                      </h5>
+
+                      {#await $auth.actor.getCustodians() then getCustodiansResult}
+                        {#each getCustodiansResult as custodian}
+                          <br />
+                          {custodian.toString().split(',')[0]}
+                        {/each}
+                      {/await}
+                    </div>
+
+                    <div class="py-4">
+                      <h5
+                        class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+                      >
+                        Ajout Administrateur
+                      </h5>
+
+                      <form class="w-full">
+                        <div
+                          class="flex items-center border-b border-blue-500 py-2"
+                        >
+                          <input
+                            class="bg-transparent border border-gray-200 w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+                            bind:value={inputAddCustodianValue}
+                            placeholder="Principal"
+                            required
+                          />
+                          <button
+                            class="flex-shrink-0 bg-blue-500 hover:bg-blue-700 border-blue-500 hover:border-blue-700 text-sm border-4 text-white py-1 px-2 rounded"
+                            type="button"
+                            on:click={addCustodian(inputAddCustodianValue)}
+                          >
+                            Ajouter
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+
+                    <div class="py-4">
+                      <h5
+                        class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+                      >
+                        Retirer Administrateur
+                      </h5>
+
+                      <form class="w-full">
+                        <div
+                          class="flex items-center border-b border-blue-500 py-2"
+                        >
+                          <input
+                            class="bg-transparent border border-gray-200 w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+                            bind:value={inputRemoveCustodianValue}
+                            placeholder="Principal"
+                            aria-label="Numéro"
+                            required
+                          />
+                          <button
+                            class="flex-shrink-0 bg-blue-500 hover:bg-blue-700 border-blue-500 hover:border-blue-700 text-sm border-4 text-white py-1 px-2 rounded"
+                            type="button"
+                            on:click={removeCustodian(
+                              inputRemoveCustodianValue
+                            )}
+                          >
+                            Retirer
                           </button>
                         </div>
                       </form>
@@ -747,8 +852,7 @@
                 >
                   <tr>
                     <th scope="col" class="py-3 px-6"> Empreinte </th>
-                    <th scope="col" class="py-3 px-6"> Type </th>
-                    <th scope="col" class="py-3 px-6"> Contenu </th>
+                    <th scope="col" class="py-3 px-6"> Contenue </th>
                     <th scope="col" class="py-3 px-6">
                       Autres marquages associés</th
                     >
@@ -771,9 +875,7 @@
                           <br />
                           à {formatCanisterDateHours(imprint.createdWhen)}
                         </td>
-                        <td class="py-4 px-6">
-                          <ImprintType type={imprint.imprintType} />
-                        </td>
+
                         <td class="py-4 px-6">
                           <ImprintData
                             data={imprint.imprintData}
@@ -841,7 +943,7 @@
           {/if}
         </div>
       </div>
-
+      <!--
       <br />
       DEBUG :
       <br />
@@ -888,29 +990,23 @@
       getImprintIdsByMarkIdTreeSize :
       {#await $auth.actor.getImprintIdsByMarkIdTreeSize() then getImprintIdsByMarkIdTreeSizeResult}
         {getImprintIdsByMarkIdTreeSizeResult}
-        {#each Array(20) as _, index (index)}
-          <li>
-            {index} :
-            {#await $auth.actor.getImprintIdsByMarkId(BigInt(index)) then getImprintIdsByMarkIdResult}
-              {getImprintIdsByMarkIdResult}
-            {/await}
-          </li>
-        {/each}
+        getImprintIdsByMarkIdTree:
+        {#await $auth.actor.getImprintIdsByMarkIdTree() then getImprintIdsByMarkIdTreeResult}
+          {getImprintIdsByMarkIdTreeResult}
+        {/await}
       {/await}
       <br />
       getMarkIdsByImprintIdTreeSize :
       {#await $auth.actor.getMarkIdsByImprintIdTreeSize() then getMarkIdsByImprintIdTreeSizeResult}
         {getMarkIdsByImprintIdTreeSizeResult}
-        {#each Array(20) as _, index (index)}
-          <li>
-            {index} :
-            {#await $auth.actor.getMarkIdsByImprintId(BigInt(index)) then getMarkIdsByImprintIdResult}
-              {getMarkIdsByImprintIdResult}
-            {/await}
-          </li>
-        {/each}
+
+        getMarkIdsByImprintIdTree:
+        {#await $auth.actor.getMarkIdsByImprintIdTree() then getMarkIdsByImprintIdTreeResult}
+          {getMarkIdsByImprintIdTreeResult}
+        {/await}
       {/await}
       <br />
+      -->
     </div>
   </section>
 </div>

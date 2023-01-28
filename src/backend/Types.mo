@@ -24,6 +24,17 @@ module {
     #Err : E;
   };
 
+  public type Custodian = {
+    custodianPrincipal : Principal;
+  };
+
+  public type CustodianList = [Custodian];
+
+  public type InitialArgs = {
+    createdBy : Principal;
+    custodians : CustodianList;
+  };
+
   public type Mark = {
     id : Nat64;
     createdWhen : Int;
@@ -52,5 +63,7 @@ module {
   public type MarkResult = Result<Mark, ApiError>;
 
   public type ImprintResult = Result<Imprint, ApiError>;
+
+  public type CustodianResult = Result<CustodianList, ApiError>;
 
 };

@@ -22,6 +22,11 @@ type ImprintData =
 type Mark = {createdBy : Principal; createdWhen : Int; id : Nat64};
 type Tree<K, V> = {#leaf; #node : (Color, Tree<K, V>, (K, ?V), Tree<K, V>)};
 actor {
+  stable var custodians :
+    {
+      #leaf;
+      #node : (Color, Tree<Text, Bool>, (Text, ?Bool), Tree<Text, Bool>)
+    };
   stable var imprintIdsByMarkId :
     {
       #leaf;

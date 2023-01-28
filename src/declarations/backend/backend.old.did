@@ -9,6 +9,11 @@ type Mark =
    createdWhen: int;
    id: nat64;
  };
+type InitialArgs = 
+ record {
+   createdBy: principal;
+   custodians: CustodianList;
+ };
 type ImprintResult = 
  variant {
    Err: ApiError;
@@ -31,7 +36,10 @@ type Imprint =
    id: nat64;
    imprintData: ImprintData;
    imprintType: nat64;
+   visible: bool;
  };
+type CustodianList = vec Custodian;
+type Custodian = record {custodianPrincipal: principal;};
 type ApiError = 
  variant {
    IdDoubloninArray;
@@ -42,20 +50,40 @@ type ApiError =
    Unauthorized;
  };
 service : {
+  addCustodian: (text) -> (bool);
   createImprint: (vec nat64, nat64, ImprintData) -> (ImprintResult);
-  createMark: () -> (Mark);
+  createMark: () -> (MarkResult);
+  getCustodians: () -> (vec record {
+                              text;
+                              bool;
+                            }) query;
+  getCustodiansTreeSize: () -> (nat) query;
   getImprint: (nat64) -> (ImprintResult) query;
   getImprintIdsByMarkId: (nat64) -> (opt vec nat64) query;
+  getImprintIdsByMarkIdTree: () -> (vec record {
+                                          nat64;
+                                          vec nat64;
+                                        }) query;
   getImprintIdsByMarkIdTreeSize: () -> (nat) query;
   getImprintsTotalCount: () -> (nat64) query;
   getImprintsTreeSize: () -> (nat) query;
   getMark: (nat64) -> (MarkResult) query;
   getMarkIdsByImprintId: (nat64) -> (opt vec nat64) query;
+  getMarkIdsByImprintIdTree: () -> (vec record {
+                                          nat64;
+                                          vec nat64;
+                                        }) query;
   getMarkIdsByImprintIdTreeSize: () -> (nat) query;
   getMarksTotalCount: () -> (nat64) query;
   getMarksTreeSize: () -> (nat) query;
+  isCustodian: (text) -> (bool) query;
   isImprintExist: (nat64) -> (bool) query;
   isMarkExist: (nat64) -> (bool) query;
+  isPrincipalCustodian: (principal) -> (bool) query;
   purgeCanister: () -> (bool);
+  removeCustodian: (text) -> (bool);
+  setImprintInvisible: (nat64) -> (ImprintResult);
+  setImprintVisible: (nat64) -> (ImprintResult);
   whoami: () -> (principal) query;
+  whoamiTextformat: () -> (text) query;
 }
