@@ -386,7 +386,7 @@
               {#await $auth.actor.getImprintsTotalCount() then totalImprints}
                 {totalImprints}
               {/await}
-            </b> empreintes ont été ajoutées. sur ces marquages.
+            </b> empreintes ont été ajoutées sur ces marquages.
           </div>
           <!-- end centered content -->
         </div>
@@ -786,6 +786,7 @@
                       </form>
                     </div>
 
+                    <!--
                     <div class="py-4">
                       <h5
                         class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
@@ -801,6 +802,7 @@
                         Purge Canister
                       </button>
                     </div>
+                    -->
                   </div>
                 </div>
                 <!-- end centered content -->

@@ -1,15 +1,20 @@
 // Version: 1.0.0
-type Color = {#B; #R};
-type Imprint =
+type Artwork =
   {
-    createdBy : Principal;
-    createdWhen : Int;
-    id : Nat64;
-    imprintData : ImprintData;
-    imprintType : Nat64;
-    visible : Bool
+    certifyBy : Principal;
+    createdAt : Nat64;
+    idArtwork : SandBlessId;
+    idCollection : SandBlessId;
+    idCreatorId : SandBlessId;
+    metadata : MetadataDesc
   };
-type ImprintData =
+type List<T> = ?(T, List<T>);
+type MetadataDesc = [MetadataPart];
+type MetadataKeyVal = {key : Text; val : MetadataVal};
+type MetadataPart =
+  {data : Blob; key_val_data : [MetadataKeyVal]; purpose : MetadataPurpose};
+type MetadataPurpose = {#Preview; #Rendered};
+type MetadataVal =
   {
     #BlobContent : Blob;
     #Nat16Content : Nat16;
@@ -19,40 +24,15 @@ type ImprintData =
     #NatContent : Nat;
     #TextContent : Text
   };
-type Mark = {createdBy : Principal; createdWhen : Int; id : Nat64};
-type Tree<K, V> = {#leaf; #node : (Color, Tree<K, V>, (K, ?V), Tree<K, V>)};
+type Nft = {id : TokenId; metadata : MetadataDesc; owner : Principal};
+type SandBlessId = Nat64;
+type TokenId = Nat64;
 actor {
-  stable var custodians :
-    {
-      #leaf;
-      #node : (Color, Tree<Text, Bool>, (Text, ?Bool), Tree<Text, Bool>)
-    };
-  stable var imprintIdsByMarkId :
-    {
-      #leaf;
-      #node :
-        (Color, Tree<Nat64, [Nat64]>, (Nat64, ?[Nat64]),
-         Tree<Nat64, [Nat64]>)
-    };
-  stable var imprints :
-    {
-      #leaf;
-      #node :
-        (Color, Tree<Nat64, Imprint>, (Nat64, ?Imprint),
-         Tree<Nat64, Imprint>)
-    };
-  stable var imprintsCounter : Nat64;
-  stable var markIdsByImprintId :
-    {
-      #leaf;
-      #node :
-        (Color, Tree<Nat64, [Nat64]>, (Nat64, ?[Nat64]),
-         Tree<Nat64, [Nat64]>)
-    };
-  stable var marks :
-    {
-      #leaf;
-      #node : (Color, Tree<Nat64, Mark>, (Nat64, ?Mark), Tree<Nat64, Mark>)
-    };
-  stable var marksCounter : Nat64
+  stable var artworks : ?(Artwork, List<Artwork>);
+  stable var logo : {data : Text; logo_type : Text};
+  stable var maxLimit : Nat16;
+  stable var name : Text;
+  stable var nfts : ?(Nft, List<Nft>);
+  stable var symbol : Text;
+  stable var transactionId : Nat
 };

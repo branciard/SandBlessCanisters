@@ -83,7 +83,6 @@ export const idlFactory = ({ IDL }) => {
     'isImprintExist' : IDL.Func([IDL.Nat64], [IDL.Bool], ['query']),
     'isMarkExist' : IDL.Func([IDL.Nat64], [IDL.Bool], ['query']),
     'isPrincipalCustodian' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
-    'purgeCanister' : IDL.Func([], [IDL.Bool], []),
     'removeCustodian' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'setImprintInvisible' : IDL.Func([IDL.Nat64], [ImprintResult], []),
     'setImprintVisible' : IDL.Func([IDL.Nat64], [ImprintResult], []),

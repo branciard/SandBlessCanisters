@@ -68,7 +68,6 @@ export interface SandBless {
   'isImprintExist' : ActorMethod<[bigint], boolean>,
   'isMarkExist' : ActorMethod<[bigint], boolean>,
   'isPrincipalCustodian' : ActorMethod<[Principal], boolean>,
-  'purgeCanister' : ActorMethod<[], boolean>,
   'removeCustodian' : ActorMethod<[string], boolean>,
   'setImprintInvisible' : ActorMethod<[bigint], ImprintResult>,
   'setImprintVisible' : ActorMethod<[bigint], ImprintResult>,

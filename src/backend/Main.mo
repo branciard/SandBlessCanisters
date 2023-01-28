@@ -136,6 +136,40 @@ shared ({ caller }) actor class SandBless(initialArgs : Types.InitialArgs) = Sel
     };
   };
 
+  public query func getMark(markId : Nat64) : async Types.MarkResult {
+    let mark : ?Types.Mark = RBTree.get(marks, Nat64.compare, markId);
+    switch (mark) {
+      case null {
+        return #Err(#InvalidMarkId);
+      };
+      case (?mark) {
+        return #Ok(mark);
+      };
+    };
+  };
+
+  public query func isImprintExist(imprintId : Nat64) : async Bool {
+    let imprint : ?Types.Imprint = RBTree.get(imprints, Nat64.compare, imprintId);
+    let exists = Option.isSome(imprint);
+    if (exists) {
+      return true;
+    } else {
+      return false;
+    };
+  };
+
+  public query func getImprint(imprintId : Nat64) : async Types.ImprintResult {
+    let imprint : ?Types.Imprint = RBTree.get(imprints, Nat64.compare, imprintId);
+    switch (imprint) {
+      case null {
+        return #Err(#InvalidImprintId);
+      };
+      case (?imprint) {
+        return #Ok(imprint);
+      };
+    };
+  };
+
   public shared ({ caller }) func addCustodian(newCustodian : Text) : async Bool {
     let custodian : ?Bool = RBTree.get(custodians, Text.compare, Principal.toText(caller));
     switch (custodian) {
@@ -172,211 +206,183 @@ shared ({ caller }) actor class SandBless(initialArgs : Types.InitialArgs) = Sel
     };
   };
 
-  public shared ({ caller }) func purgeCanister() : async Bool {
+  public shared ({ caller }) func createMark() : async Types.MarkResult {
     let custodian : ?Bool = RBTree.get(custodians, Text.compare, Principal.toText(caller));
     switch (custodian) {
       case null {
-        return false;
+        return #Err(#Unauthorized);
       };
       case (?custodian) {
-        marksCounter := 0;
-        marks := RBTree.init<Nat64, Types.Mark>();
-        imprintsCounter := 0;
-        imprints := RBTree.init<Nat64, Types.Imprint>();
-        imprintIdsByMarkId := RBTree.init<Nat64, [Nat64]>();
-        markIdsByImprintId := RBTree.init<Nat64, [Nat64]>();
-        custodians := RBTree.init<Text, Bool>();
-        return true;
-      };
-    };
-  };
-
-  public query func getMark(markId : Nat64) : async Types.MarkResult {
-    let mark : ?Types.Mark = RBTree.get(marks, Nat64.compare, markId);
-    switch (mark) {
-      case null {
-        return #Err(#InvalidMarkId);
-      };
-      case (?mark) {
+        marksCounter += 1;
+        let mark : Types.Mark = {
+          id = marksCounter;
+          createdWhen = Time.now();
+          createdBy = caller;
+        };
+        // Choice : allways trust marksCounter to populate or replace tree structure.
+        let (markEntryUpdated, marksFromUpdate) = RBTree.replace(marks, Nat64.compare, marksCounter, mark);
+        if (Option.isSome(markEntryUpdated)) {
+          marks := marksFromUpdate;
+        } else {
+          marks := RBTree.put(marks, Nat64.compare, marksCounter, mark);
+        };
         return #Ok(mark);
       };
     };
   };
 
-  public query func isImprintExist(imprintId : Nat64) : async Bool {
-    let imprint : ?Types.Imprint = RBTree.get(imprints, Nat64.compare, imprintId);
-    let exists = Option.isSome(imprint);
-    if (exists) {
-      return true;
-    } else {
-      return false;
-    };
-  };
-
-  public query func getImprint(imprintId : Nat64) : async Types.ImprintResult {
-    let imprint : ?Types.Imprint = RBTree.get(imprints, Nat64.compare, imprintId);
-    switch (imprint) {
-      case null {
-        return #Err(#InvalidImprintId);
-      };
-      case (?imprint) {
-        return #Ok(imprint);
-      };
-    };
-  };
-
-  public shared ({ caller }) func createMark() : async Types.MarkResult {
-    marksCounter += 1;
-    let mark : Types.Mark = {
-      id = marksCounter;
-      createdWhen = Time.now();
-      createdBy = caller;
-    };
-    // Choice : allways trust marksCounter to populate or replace tree structure.
-    let (markEntryUpdated, marksFromUpdate) = RBTree.replace(marks, Nat64.compare, marksCounter, mark);
-    if (Option.isSome(markEntryUpdated)) {
-      marks := marksFromUpdate;
-    } else {
-      marks := RBTree.put(marks, Nat64.compare, marksCounter, mark);
-    };
-
-    return #Ok(mark);
-  };
-
   public shared ({ caller }) func setImprintVisible(imprintId : Nat64) : async Types.ImprintResult {
-
-    let imprint : ?Types.Imprint = RBTree.get(imprints, Nat64.compare, imprintId);
-    switch (imprint) {
+    let custodian : ?Bool = RBTree.get(custodians, Text.compare, Principal.toText(caller));
+    switch (custodian) {
       case null {
-        return #Err(#InvalidImprintId);
+        return #Err(#Unauthorized);
       };
-      case (?imprint) {
-        let imprintToUpdate : Types.Imprint = {
-          id = imprint.id;
-          createdWhen = imprint.createdWhen;
-          createdBy = imprint.createdBy;
-          imprintType = imprint.imprintType;
-          imprintData = imprint.imprintData;
-          visible = true;
+      case (?custodian) {
+        let imprint : ?Types.Imprint = RBTree.get(imprints, Nat64.compare, imprintId);
+        switch (imprint) {
+          case null {
+            return #Err(#InvalidImprintId);
+          };
+          case (?imprint) {
+            let imprintToUpdate : Types.Imprint = {
+              id = imprint.id;
+              createdWhen = imprint.createdWhen;
+              createdBy = imprint.createdBy;
+              imprintType = imprint.imprintType;
+              imprintData = imprint.imprintData;
+              visible = true;
+            };
+            let (imprintsEntry, imprintsUpdated) = RBTree.replace(imprints, Nat64.compare, imprint.id, imprintToUpdate);
+            if (Option.isSome(imprintsEntry)) {
+              imprints := imprintsUpdated;
+            } else {
+              imprints := RBTree.put(imprints, Nat64.compare, imprint.id, imprintToUpdate);
+            };
+            return #Ok(imprintToUpdate);
+          };
         };
-        let (imprintsEntry, imprintsUpdated) = RBTree.replace(imprints, Nat64.compare, imprint.id, imprintToUpdate);
-        if (Option.isSome(imprintsEntry)) {
-          imprints := imprintsUpdated;
-        } else {
-          imprints := RBTree.put(imprints, Nat64.compare, imprint.id, imprintToUpdate);
-        };
-        return #Ok(imprintToUpdate);
       };
     };
   };
 
   public shared ({ caller }) func setImprintInvisible(imprintId : Nat64) : async Types.ImprintResult {
-
-    let imprint : ?Types.Imprint = RBTree.get(imprints, Nat64.compare, imprintId);
-    switch (imprint) {
+    let custodian : ?Bool = RBTree.get(custodians, Text.compare, Principal.toText(caller));
+    switch (custodian) {
       case null {
-        return #Err(#InvalidImprintId);
+        return #Err(#Unauthorized);
       };
-      case (?imprint) {
-        let imprintToUpdate : Types.Imprint = {
-          id = imprint.id;
-          createdWhen = imprint.createdWhen;
-          createdBy = imprint.createdBy;
-          imprintType = imprint.imprintType;
-          imprintData = imprint.imprintData;
-          visible = false;
+      case (?custodian) {
+        let imprint : ?Types.Imprint = RBTree.get(imprints, Nat64.compare, imprintId);
+        switch (imprint) {
+          case null {
+            return #Err(#InvalidImprintId);
+          };
+          case (?imprint) {
+            let imprintToUpdate : Types.Imprint = {
+              id = imprint.id;
+              createdWhen = imprint.createdWhen;
+              createdBy = imprint.createdBy;
+              imprintType = imprint.imprintType;
+              imprintData = imprint.imprintData;
+              visible = false;
+            };
+            let (imprintsEntry, imprintsUpdated) = RBTree.replace(imprints, Nat64.compare, imprint.id, imprintToUpdate);
+            if (Option.isSome(imprintsEntry)) {
+              imprints := imprintsUpdated;
+            } else {
+              imprints := RBTree.put(imprints, Nat64.compare, imprint.id, imprintToUpdate);
+            };
+            return #Ok(imprintToUpdate);
+          };
         };
-        let (imprintsEntry, imprintsUpdated) = RBTree.replace(imprints, Nat64.compare, imprint.id, imprintToUpdate);
-        if (Option.isSome(imprintsEntry)) {
-          imprints := imprintsUpdated;
-        } else {
-          imprints := RBTree.put(imprints, Nat64.compare, imprint.id, imprintToUpdate);
-        };
-        return #Ok(imprintToUpdate);
       };
     };
   };
 
   public shared ({ caller }) func createImprint(markIds : [Nat64], imprintType : Nat64, imprintData : Types.ImprintData) : async Types.ImprintResult {
-
-    //Check at least one mark to update
-    if (markIds.size() == 0) {
-      return #Err(#ImprintWithoutMark);
-    };
-
-    //check doublon in markIds
-    try {
-      let markIdsToSet = TrieSet.fromArray(markIds, nat64Hash, Nat64.equal);
-      let markIdsToSetSize = TrieSet.size(markIdsToSet);
-      if (markIdsToSetSize != markIds.size()) {
-        return #Err(#IdDoubloninArray);
+    let custodian : ?Bool = RBTree.get(custodians, Text.compare, Principal.toText(caller));
+    switch (custodian) {
+      case null {
+        return #Err(#Unauthorized);
       };
-    } catch (e) {
-      return #Err(#IdDoubloninArray);
-    };
+      case (?custodian) {
+        //Check at least one mark to update
+        if (markIds.size() == 0) {
+          return #Err(#ImprintWithoutMark);
+        };
 
-    //Check all marks ids exist
-    for (markId in markIds.vals()) {
-      let mark : ?Types.Mark = RBTree.get(marks, Nat64.compare, markId);
-      if (Option.isNull(mark)) {
-        return #Err(#InvalidMarkId);
-      };
-    };
+        //check doublon in markIds
+        try {
+          let markIdsToSet = TrieSet.fromArray(markIds, nat64Hash, Nat64.equal);
+          let markIdsToSetSize = TrieSet.size(markIdsToSet);
+          if (markIdsToSetSize != markIds.size()) {
+            return #Err(#IdDoubloninArray);
+          };
+        } catch (e) {
+          return #Err(#IdDoubloninArray);
+        };
 
-    // Create Imprint
-    imprintsCounter += 1;
-    let imprint : Types.Imprint = {
-      id = imprintsCounter;
-      createdWhen = Time.now();
-      createdBy = caller;
-      imprintType = imprintType;
-      imprintData = imprintData;
-      visible = true;
-    };
-
-    // markIdsByImprintId updates
-    let (markIdsByImprintIdEntry, markIdsByImprintIdUpdated) = RBTree.replace(markIdsByImprintId, Nat64.compare, imprint.id, markIds);
-    if (Option.isSome(markIdsByImprintIdEntry)) {
-      markIdsByImprintId := markIdsByImprintIdUpdated;
-    } else {
-      markIdsByImprintId := RBTree.put(markIdsByImprintId, Nat64.compare, imprint.id, markIds);
-    };
-
-    // imprintIdsByMarkId updates
-    for (markId in markIds.vals()) {
-      let imprintIdsByMarkIdValues : ?[Nat64] = RBTree.get(imprintIdsByMarkId, Nat64.compare, markId);
-      switch imprintIdsByMarkIdValues {
-        case (null) {
-          // choice : allways trust counter to populate or replace over tree structure.
-          let (imprintIdsByMarkIdIdEntry, imprintIdsByMarkIdUpdated) = RBTree.replace(imprintIdsByMarkId, Nat64.compare, markId, [imprintsCounter]);
-          if (Option.isSome(imprintIdsByMarkIdIdEntry)) {
-            imprintIdsByMarkId := imprintIdsByMarkIdUpdated;
-          } else {
-            imprintIdsByMarkId := RBTree.put(imprintIdsByMarkId, Nat64.compare, markId, [imprintsCounter]);
+        //Check all marks ids exist
+        for (markId in markIds.vals()) {
+          let mark : ?Types.Mark = RBTree.get(marks, Nat64.compare, markId);
+          if (Option.isNull(mark)) {
+            return #Err(#InvalidMarkId);
           };
         };
-        case (?imprintIdsByMarkIdValues) {
-          let buffer = StableBuffer.fromArray<Nat64>(imprintIdsByMarkIdValues);
-          StableBuffer.add(buffer, imprintsCounter);
-          let (imprintIdsByMarkIdIdEntry, imprintIdsByMarkIdUpdated) = RBTree.replace(imprintIdsByMarkId, Nat64.compare, markId, StableBuffer.toArray(buffer));
-          if (Option.isSome(imprintIdsByMarkIdIdEntry)) {
-            imprintIdsByMarkId := imprintIdsByMarkIdUpdated;
-          } else {
-            imprintIdsByMarkId := RBTree.put(imprintIdsByMarkId, Nat64.compare, markId, StableBuffer.toArray(buffer));
+
+        // Create Imprint
+        imprintsCounter += 1;
+        let imprint : Types.Imprint = {
+          id = imprintsCounter;
+          createdWhen = Time.now();
+          createdBy = caller;
+          imprintType = imprintType;
+          imprintData = imprintData;
+          visible = true;
+        };
+
+        // markIdsByImprintId updates
+        let (markIdsByImprintIdEntry, markIdsByImprintIdUpdated) = RBTree.replace(markIdsByImprintId, Nat64.compare, imprint.id, markIds);
+        if (Option.isSome(markIdsByImprintIdEntry)) {
+          markIdsByImprintId := markIdsByImprintIdUpdated;
+        } else {
+          markIdsByImprintId := RBTree.put(markIdsByImprintId, Nat64.compare, imprint.id, markIds);
+        };
+
+        // imprintIdsByMarkId updates
+        for (markId in markIds.vals()) {
+          let imprintIdsByMarkIdValues : ?[Nat64] = RBTree.get(imprintIdsByMarkId, Nat64.compare, markId);
+          switch imprintIdsByMarkIdValues {
+            case (null) {
+              // choice : allways trust counter to populate or replace over tree structure.
+              let (imprintIdsByMarkIdIdEntry, imprintIdsByMarkIdUpdated) = RBTree.replace(imprintIdsByMarkId, Nat64.compare, markId, [imprintsCounter]);
+              if (Option.isSome(imprintIdsByMarkIdIdEntry)) {
+                imprintIdsByMarkId := imprintIdsByMarkIdUpdated;
+              } else {
+                imprintIdsByMarkId := RBTree.put(imprintIdsByMarkId, Nat64.compare, markId, [imprintsCounter]);
+              };
+            };
+            case (?imprintIdsByMarkIdValues) {
+              let buffer = StableBuffer.fromArray<Nat64>(imprintIdsByMarkIdValues);
+              StableBuffer.add(buffer, imprintsCounter);
+              let (imprintIdsByMarkIdIdEntry, imprintIdsByMarkIdUpdated) = RBTree.replace(imprintIdsByMarkId, Nat64.compare, markId, StableBuffer.toArray(buffer));
+              if (Option.isSome(imprintIdsByMarkIdIdEntry)) {
+                imprintIdsByMarkId := imprintIdsByMarkIdUpdated;
+              } else {
+                imprintIdsByMarkId := RBTree.put(imprintIdsByMarkId, Nat64.compare, markId, StableBuffer.toArray(buffer));
+              };
+            };
           };
         };
+
+        let (imprintsEntry, imprintsUpdated) = RBTree.replace(imprints, Nat64.compare, imprint.id, imprint);
+        if (Option.isSome(imprintsEntry)) {
+          imprints := imprintsUpdated;
+        } else {
+          imprints := RBTree.put(imprints, Nat64.compare, imprint.id, imprint);
+        };
+        return #Ok(imprint);
       };
     };
-
-    let (imprintsEntry, imprintsUpdated) = RBTree.replace(imprints, Nat64.compare, imprint.id, imprint);
-    if (Option.isSome(imprintsEntry)) {
-      imprints := imprintsUpdated;
-    } else {
-      imprints := RBTree.put(imprints, Nat64.compare, imprint.id, imprint);
-    };
-
-    return #Ok(imprint);
-
   };
-
 };
