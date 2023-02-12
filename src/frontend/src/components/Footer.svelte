@@ -11,9 +11,9 @@
         <div class="px-3 md:px-0">
           <h3 class="font-bold text-gray-900">A propos</h3>
           <p class="py-2">
-            Je personnalise verres, bouteilles, carafes, thermos ou autre
-            objets, pour une mise en valeur de votre production viticole, bars,
-            restaurants, évenements, mariages ou décorations.
+            Artisan graveur, je personnalise verres, bouteilles, carafes,
+            thermos ou autre objets, pour une mise en valeur de votre production
+            viticole, bars, restaurants, évenements, mariages ou décorations.
           </p>
           <p class="py-2">
             Envoyez textes, logos, photos ou idées par e-mail et le support

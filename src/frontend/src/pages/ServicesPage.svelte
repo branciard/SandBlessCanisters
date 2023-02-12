@@ -34,7 +34,9 @@
 
           <a
             class="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
-            href="mailto:contact@sandbless.fr?subject=Commande&nbsp;Gravure"
+            target="_blank"
+            rel="noreferrer"
+            href="https://forms.gle/csEKAepKwz4Uqm4c9"
             >Commandez votre gravure</a
           >
         </div>
@@ -51,7 +53,9 @@
       >
         <a
           class="uppercase tracking-wide no-underline hover:no-underline font-bold text-gray-800 text-xl"
-          href="#"
+          href="https://forms.gle/csEKAepKwz4Uqm4c9"
+          target="_blank"
+          rel="noreferrer"
         >
           Services
         </a>
@@ -62,7 +66,9 @@
 
     <div class="w-full md:w-1/3 xl:w-1/4 p-6 flex flex-col">
       <a
-        href="mailto:contact@sandbless.fr?subject=Commande&nbsp;Gravure&nbsp;Simple"
+        href="https://forms.gle/csEKAepKwz4Uqm4c9"
+        target="_blank"
+        rel="noreferrer"
       >
         <ImageIPFSGateway
           gateway="https://gateway.pinata.cloud/ipfs/"
@@ -77,7 +83,9 @@
 
     <div class="w-full md:w-1/3 xl:w-1/4 p-6 flex flex-col">
       <a
-        href="mailto:contact@sandbless.fr?subject=Commande&nbsp;Gravure&nbsp;avanc&eacute;e"
+        href="https://forms.gle/FbQxyHbwVTrhp74DA"
+        target="_blank"
+        rel="noreferrer"
       >
         <ImageIPFSGateway
           gateway="https://gateway.pinata.cloud/ipfs/"
@@ -92,7 +100,9 @@
 
     <div class="w-full md:w-1/3 xl:w-1/4 p-6 flex flex-col">
       <a
-        href="mailto:contact@sandbless.fr?subject=Commande&nbsp;Gravure&nbsp;avanc&eacute;e&nbsp;avec&nbsp;peinture"
+        href="https://forms.gle/nJ4PLzotZ2bvitkz9"
+        target="_blank"
+        rel="noreferrer"
       >
         <ImageIPFSGateway
           gateway="https://gateway.pinata.cloud/ipfs/"
@@ -106,7 +116,9 @@
     </div>
     <div class="w-full md:w-1/3 xl:w-1/4 p-6 flex flex-col">
       <a
-        href="mailto:contact@sandbless.fr?subject=Commande&nbsp;Gravure&nbsp;SAND&nbsp;BLESS&nbsp;ID"
+        href="https://forms.gle/nJ4PLzotZ2bvitkz9"
+        target="_blank"
+        rel="noreferrer"
       >
         <ImageIPFSGateway
           gateway="https://gateway.pinata.cloud/ipfs/"

@@ -80,7 +80,6 @@ service : {
   isImprintExist: (nat64) -> (bool) query;
   isMarkExist: (nat64) -> (bool) query;
   isPrincipalCustodian: (principal) -> (bool) query;
-  purgeCanister: () -> (bool);
   removeCustodian: (text) -> (bool);
   setImprintInvisible: (nat64) -> (ImprintResult);
   setImprintVisible: (nat64) -> (ImprintResult);
