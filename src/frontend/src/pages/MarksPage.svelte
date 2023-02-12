@@ -336,6 +336,7 @@
         console.log('checkOK true');
         checkOk = true;
         checkKo = false;
+
         await getMarkAndloadPage(markId);
       } else {
         checkOk = false;

@@ -53,7 +53,7 @@
           class="uppercase tracking-wide no-underline hover:no-underline font-bold text-gray-800 text-xl"
           href="#"
         >
-          Tarification des services
+          Services
         </a>
 
         <div class="flex items-center" id="store-nav-content" />
@@ -71,7 +71,7 @@
         <div class="pt-3 flex items-center justify-between">
           <p class="">Sablage simple (ex : texte)</p>
         </div>
-        <p class="pt-1 text-gray-900">7 € HT</p>
+        <p class="pt-1 text-gray-900" />
       </a>
     </div>
 
@@ -86,7 +86,7 @@
         <div class="pt-3 flex items-center justify-between">
           <p class="">Sablage avanc&eacute; ( ex : logo, photo)</p>
         </div>
-        <p class="pt-1 text-gray-900">12 € HT</p>
+        <p class="pt-1 text-gray-900" />
       </a>
     </div>
 
@@ -101,7 +101,7 @@
         <div class="pt-3 flex items-center justify-between">
           <p class="">Sablage avancé et sérigraphie couleur</p>
         </div>
-        <p class="pt-1 text-gray-900">18 € HT</p>
+        <p class="pt-1 text-gray-900" />
       </a>
     </div>
     <div class="w-full md:w-1/3 xl:w-1/4 p-6 flex flex-col">
@@ -113,9 +113,9 @@
           cid="QmSmLmZs6F5vycwWBk3NeCgHLnuYEzKpaFSFV7obLLzijQ"
         />
         <div class="pt-3 flex items-center justify-between">
-          <p class="">Marquage unique vérifiable ( bientot disponible )</p>
+          <p class="">Marquage unique vérifiable</p>
         </div>
-        <p class="pt-1 text-gray-900">9 € HT</p>
+        <p class="pt-1 text-gray-900" />
       </a>
     </div>
   </div>
