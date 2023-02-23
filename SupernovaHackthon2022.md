@@ -1,8 +1,6 @@
-<p align="left" >
-  <img width="240"  src="./assets/logo.png">
-</p>
-
 # Sand Bless Unction
+
+Project bootstrap at Supernova Dfinity hackathon. See details on DevPost [here](./https://devpost.com/software/sand-bless-unction)
 
 ## Bless your artwork using owned crypto-marks
 
