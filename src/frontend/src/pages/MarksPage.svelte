@@ -418,8 +418,9 @@
 
             <a
               class="bg-blue-500 hover:bg-blue-700 border-blue-500 hover:border-blue-700 text-sm border-4 text-white py-1 px-2 rounded"
-              href="mailto:contact@sandbless.fr?subject=Commandez&nbsp;un&nbsp;marquage"
-              target="_blank">Commandez un marquage</a
+              href="https://forms.gle/nJ4PLzotZ2bvitkz9"
+              target="_blank"
+              rel="noreferrer">Commandez un marquage</a
             >
 
             <form class="w-full">
