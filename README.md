@@ -1,11 +1,10 @@
-<p align="left" >
-  <img width="100%"  src="./assets/SandblessLogo1.0withbackgroundbandeau.png">
-</p>
-
 # Sand Bless
 
 Project bootstrap at Supernova Dfinity hackathon. See details [here](./SupernovaHackthon2022.md)
 
+<p align="left" >
+  <img width="100%"  src="./assets/SandblessLogo1.0withbackgroundbandeau.png">
+</p>
 
 Deployed at [sandbless.fr](http://sandbless.fr)
 
