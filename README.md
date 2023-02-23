@@ -1,6 +1,6 @@
 # Sand Bless
 
-Project bootstrap at Supernova Dfinity hackathon. See details [here](./SupernovaHackthon2022.md)
+Project bootstrap at Supernova Dfinity 2022 hackathon. See details [here](./SupernovaHackthon2022.md)
 
 <p align="left" >
   <img width="100%"  src="./assets/SandblessLogo1.0withbackgroundbandeau.png">
