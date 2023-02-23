@@ -98,7 +98,7 @@ cd ..
 
 To build and deploy the project run
 
-
+```
 dfx deploy --argument "(
   record {
     createdBy = principal\"$(dfx identity get-principal)\";
@@ -109,6 +109,7 @@ dfx deploy --argument "(
         }
   }
 )"
+```
 
 
 When the process completes you'll have a backend and a frontend canister running locally. To find the frontend canister's ID, run
