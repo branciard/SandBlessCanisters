@@ -1,5 +1,5 @@
 <p align="left" >
-  <img width="240"  src="./assets/logo.png">
+  <img width="100%"  src="./assets/SandblessLogo1.0withbackgroundbandeau.png">
 </p>
 
 # Sand Bless
