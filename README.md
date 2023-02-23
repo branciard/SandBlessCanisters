@@ -7,17 +7,17 @@
 - Create and search marks number to engrave on artwork :
 
 <p align="left" >
-  <img width="240"  src="./assets/sandbless_screenshot_0.jpg" width="1024" height="576">
+  <img  src="./assets/sandbless_screenshot_0.jpg" width="1024" height="576">
 </p>
 
 - Add imprints linked to marks number to track story and certifictions of the artwork:
 
 <p align="left" >
-  <img width="240"  src="./assets/sandbless_screenshot_1.jpg" width="1024" height="576">
+  <img   src="./assets/sandbless_screenshot_1.jpg" width="1024" height="576">
 </p>
 
 <p align="left" >
-  <img width="240"  src="./assets/sandbless_screenshot_2.jpg" width="1024" height="576">
+  <img src="./assets/sandbless_screenshot_2.jpg" width="1024" height="576">
 </p>
 
 
